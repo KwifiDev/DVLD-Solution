@@ -32,9 +32,9 @@ namespace DVLD_BL
             else return null;
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_Countries.GetAllCountries();
+            return await ClsDA_Countries.GetAllCountries();
         }
 
 

@@ -25,7 +25,7 @@ namespace DVLD_BL
             {
                 _licenseClassID = value;
                 if (_licenseClassID == -1) return;
-                ExpirationDate = IssueDate.AddYears(ClsBL_LicenseClass.Find(_licenseClassID).DefaultValidityLength);
+                SetExpirationDateAsync();
             }
         }
         public DateTime IssueDate { get; set; }
@@ -81,6 +81,11 @@ namespace DVLD_BL
 
             enMode = EnMode.Update;
         }
+        private async void SetExpirationDateAsync()
+        {
+            ExpirationDate = IssueDate.AddYears((await ClsBL_LicenseClass.Find(_licenseClassID)).DefaultValidityLength);
+
+        }
 
         public static async Task<ClsBL_License> CreateAsync(int licenseID, int applicationID, int driverID, int licenseClassID, DateTime issueDate,
                                         DateTime expirationDate, string notes, float paidFees,
@@ -90,8 +95,8 @@ namespace DVLD_BL
                 expirationDate, notes, paidFees, isActive, issueReason, createdByUserID)
             {
                 DriverInfo = await ClsBL_Driver.Find(driverID),
-                LicenseClassInfo = ClsBL_LicenseClass.Find(licenseClassID),
-                DetainedInfo = ClsBL_DetainedLicense.FindByLicenseID(licenseID)
+                LicenseClassInfo = await ClsBL_LicenseClass.Find(licenseClassID),
+                DetainedInfo = await ClsBL_DetainedLicense.FindByLicenseID(licenseID)
             };
 
             return license;
@@ -180,14 +185,14 @@ namespace DVLD_BL
             return string.IsNullOrEmpty(Notes) ? "No Notes" : Notes;
         }
 
-        public bool IsDetained()
+        public async Task<bool> IsDetained()
         {
-            return ClsBL_DetainedLicense.IsDetained(LicenseID);
+            return await ClsBL_DetainedLicense.IsDetained(LicenseID);
         }
 
-        public string GetIsDetainedText()
+        public async Task<string> GetIsDetainedText()
         {
-            return IsDetained() ? "Yes" : "No";
+            return await IsDetained() ? "Yes" : "No";
         }
 
         public bool IsExpird()
@@ -329,10 +334,10 @@ namespace DVLD_BL
                 return false;
             }
 
-            return DetainedInfo.ReleaseLicense(createdByUserID, releaseApp.ApplicationID);
+            return await DetainedInfo.ReleaseLicense(createdByUserID, releaseApp.ApplicationID);
         }
 
-        public bool Detain(float fineFees, int createdByUserID)
+        public async Task<bool> Detain(float fineFees, int createdByUserID)
         {
             ClsBL_DetainedLicense detainedLicense = new ClsBL_DetainedLicense
             {
@@ -341,7 +346,7 @@ namespace DVLD_BL
                 CreatedByUserID = createdByUserID
             };
 
-            if (!detainedLicense.Save())
+            if (!await detainedLicense.Save())
             {
                 return false;
             }

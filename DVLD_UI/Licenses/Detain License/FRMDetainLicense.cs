@@ -1,6 +1,7 @@
 ﻿using ComponentFactory.Krypton.Toolkit;
 using DVLD_BL;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.Froms
@@ -27,9 +28,9 @@ namespace DVLD_UI.Froms
             if (_licenseID != -1) ucFindLicense1.SelectLicense(_licenseID);
         }
 
-        private void UcFindLicense1_OnLicenseFoundAndActive(ClsBL_License license)
+        private async void UcFindLicense1_OnLicenseFoundAndActive(ClsBL_License license)
         {
-            if (license.IsDetained())
+            if (await license.IsDetained())
             {
                 MessageBox.Show("This License Is Already Detained", "Info", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 ucDetainLicense1.ResetControls();

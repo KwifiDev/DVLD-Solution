@@ -49,7 +49,7 @@ namespace DVLD_BL
                 ApplicationTypeInfo = await ClsBL_ApplicationType.Find(applicationTypeID),
 
                 // Initialize Sub OBJ
-                LicenseClassInfo = ClsBL_LicenseClass.Find(licenseClassID)
+                LicenseClassInfo = await ClsBL_LicenseClass.Find(licenseClassID)
             };
             
             return licenseApplication;
@@ -197,9 +197,9 @@ namespace DVLD_BL
             return GetPassedTestsByLDLApplicationID(LocalDrivingLicenseApplicationID);
         }
 
-        public static string GetClassNameByID(int localDrivingLicenseApplicationID)
+        public static async Task<string> GetClassNameByID(int localDrivingLicenseApplicationID)
         {
-            return ClsBL_LicenseClass.GetLicenseClassNameByLDLApplicationID(localDrivingLicenseApplicationID);
+            return await ClsBL_LicenseClass.GetLicenseClassNameByLDLApplicationID(localDrivingLicenseApplicationID);
         }
 
         public static async Task<int> GetActiveLicenseIDByLDLApplicationID(int localDrivingLicenseApplicationID)
@@ -346,9 +346,9 @@ namespace DVLD_BL
             return -1;
         }
 
-        public string GetAppliedLicense()
+        public async Task<string> GetAppliedLicense()
         {
-            return ClsDA_LicenseClasses.GetLicenseClassNameByID(LicenseClassID);
+            return await ClsDA_LicenseClasses.GetLicenseClassNameByID(LicenseClassID);
         }
     }
 }

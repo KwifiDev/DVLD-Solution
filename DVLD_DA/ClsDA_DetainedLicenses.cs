@@ -4,12 +4,28 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace DVLD_DA
 {
     public class ClsDA_DetainedLicenses
     {
-        public static int AddNewDetainedLicense(int licenseID, DateTime detainDate, float fineFees, int createdByUserID)
+        public class Data
+        {
+            public bool IsFound { get; set; }
+            public int DetainID { get; set; }
+            public int LicenseID { get; set; }
+            public DateTime DetainDate { get; set; }
+            public float FineFees { get; set; }
+            public int CreatedByUserID { get; set; }
+            public bool IsReleased { get; set; }
+            public DateTime? ReleaseDate { get; set; }
+            public int? ReleasedByUserID { get; set; }
+            public int? ReleaseApplicationID { get; set; }
+        }
+
+        public static async Task<int> AddNewDetainedLicense(int licenseID, DateTime detainDate, float fineFees, int createdByUserID)
         {
             int detainID = -1;
 
@@ -27,8 +43,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         detainID = result;
@@ -44,7 +60,7 @@ namespace DVLD_DA
             return detainID;
         }
 
-        public static bool UpdateDetainedLicense(int detainID, bool isReleased, DateTime? releaseDate,
+        public static async Task<bool> UpdateDetainedLicense(int detainID, bool isReleased, DateTime? releaseDate,
                                                  int? releasedByUserID, int? releaseApplicationID)
         {
             bool isUpdated = false;
@@ -67,8 +83,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -81,12 +97,9 @@ namespace DVLD_DA
             }
         }
 
-        public static bool GetDetainedLicenseByID(int detainID, ref int licenseID, ref DateTime detainDate,
-                                                  ref float fineFees, ref int createdByUserID,
-                                                  ref bool isReleased, ref DateTime? releaseDate,
-                                                  ref int? releasedByUserID, ref int? releaseApplicationID)
+        public static async Task<Data> GetDetainedLicenseByID(int detainID)
         {
-            bool isFound = false;
+            Data detainedLicense = null;
 
             string query = @"SELECT * FROM DetainedLicenses WHERE DetainID = @DetainID";
 
@@ -98,21 +111,26 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            licenseID = (int)reader["LicenseID"];
-                            detainDate = (DateTime)reader["DetainDate"];
-                            fineFees = Convert.ToSingle(reader["FineFees"]);
-                            createdByUserID = (int)reader["CreatedByUserID"];
-                            isReleased = (bool)reader["IsReleased"];
-                            releaseDate = (DateTime)reader["ReleaseDate"];
-                            releasedByUserID = (int)reader["ReleasedByUserID"];
-                            releaseApplicationID = (int)reader["ReleaseApplicationID"];
+                            detainedLicense = new Data
+                            {
+                                IsFound = true,
+                                DetainID = detainID,
+                                LicenseID = (int)reader["LicenseID"],
+                                DetainDate = (DateTime)reader["DetainDate"],
+                                FineFees = Convert.ToSingle(reader["FineFees"]),
+                                CreatedByUserID = (int)reader["CreatedByUserID"],
+                                IsReleased = (bool)reader["IsReleased"],
+                                ReleaseDate = reader["ReleaseDate"] != DBNull.Value ? (DateTime?)reader["ReleaseDate"] : null,
+                                ReleasedByUserID = reader["ReleasedByUserID"] != DBNull.Value ? (int?)reader["ReleasedByUserID"] : null,
+                                ReleaseApplicationID = reader["ReleaseApplicationID"] != DBNull.Value ? (int?)reader["ReleaseApplicationID"] : null
+                            };
+
                         }
                     }
 
@@ -123,15 +141,13 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return detainedLicense;
             }
         }
-        public static bool GetDetainedLicenseByLicenseID(ref int detainID, int licenseID, ref DateTime detainDate,
-                                                        ref float fineFees, ref int createdByUserID,
-                                                        ref bool isReleased, ref DateTime? releaseDate,
-                                                        ref int? releasedByUserID, ref int? releaseApplicationID)
+
+        public static async Task<Data> GetDetainedLicenseByLicenseID(int licenseID)
         {
-            bool isFound = false;
+            Data detainedLicense = null;
 
             string query = @"SELECT * FROM DetainedLicenses WHERE LicenseID = @LicenseID AND IsReleased = 0";
 
@@ -143,21 +159,25 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            detainID = (int)reader["DetainID"];
-                            detainDate = (DateTime)reader["DetainDate"];
-                            fineFees = Convert.ToSingle(reader["FineFees"]);
-                            createdByUserID = (int)reader["CreatedByUserID"];
-                            isReleased = (bool)reader["IsReleased"];
-                            releaseDate = (DateTime)reader["ReleaseDate"];
-                            releasedByUserID = (int)reader["ReleasedByUserID"];
-                            releaseApplicationID = (int)reader["ReleaseApplicationID"];
+                            detainedLicense = new Data
+                            {
+                                IsFound = true,
+                                LicenseID = licenseID,
+                                DetainID = (int)reader["DetainID"],
+                                DetainDate = (DateTime)reader["DetainDate"],
+                                FineFees = Convert.ToSingle(reader["FineFees"]),
+                                CreatedByUserID = (int)reader["CreatedByUserID"],
+                                IsReleased = (bool)reader["IsReleased"],
+                                ReleaseDate = reader["ReleaseDate"] != DBNull.Value ? (DateTime?)reader["ReleaseDate"] : null,
+                                ReleasedByUserID = reader["ReleasedByUserID"] != DBNull.Value ? (int?)reader["ReleasedByUserID"] : null,
+                                ReleaseApplicationID = reader["ReleaseApplicationID"] != DBNull.Value ? (int?)reader["ReleaseApplicationID"] : null
+                            };
                         }
                     }
 
@@ -168,10 +188,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return detainedLicense;
             }
         }
-        public static DataTable GetAllDetainedLicenses()
+
+        public static async Task<DataTable> GetAllDetainedLicenses()
         {
             DataTable dt_DetainedLicenses = new DataTable();
 
@@ -182,9 +203,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_DetainedLicenses.Load(reader);
                     }
@@ -200,7 +221,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllDetainedLicenses_View()
+        public static async Task<DataTable> GetAllDetainedLicenses_View()
         {
             DataTable dt_DetainedLicenses_View = new DataTable();
 
@@ -211,9 +232,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_DetainedLicenses_View.Load(reader);
                     }
@@ -229,7 +250,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsDetainedLicenseExist(int detainID)
+        public static async Task<bool> IsDetainedLicenseExist(int detainID)
         {
             bool isExist = false;
 
@@ -243,9 +264,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
@@ -258,7 +279,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsDetained(int licenseID)
+        public static async Task<bool> IsDetained(int licenseID)
         {
             bool isDetained = false;
 
@@ -273,9 +294,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isDetained = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isDetained = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
@@ -288,7 +309,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool ReleaseDetainedLicense(int detainID,
+        public static async Task<bool> ReleaseDetainedLicense(int detainID,
                  int? releasedByUserID, int? releaseApplicationID)
         {
             bool isReleased = false;
@@ -310,8 +331,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isReleased = (affectedRows > 0);
                 }
                 catch (Exception ex)

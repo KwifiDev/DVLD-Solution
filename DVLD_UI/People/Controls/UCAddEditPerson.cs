@@ -31,7 +31,7 @@ namespace DVLD_UI
 
         public async Task LoadData(int personID)
         {
-            InitializeDefaultData();
+            await InitializeDefaultData();
 
             if (personID == -1)
             {
@@ -56,9 +56,9 @@ namespace DVLD_UI
             }
         }
 
-        private void InitializeDefaultData()
+        private async Task InitializeDefaultData()
         {
-            cbCounties.DataSource = ClsBL_Country.Load();
+            cbCounties.DataSource = await ClsBL_Country.Load();
             cbCounties.DisplayMember = "CountryName";
             cbCounties.ValueMember = "CountryID";
             cbCounties.SelectedIndex = cbCounties.FindString("Syria"); // Syria

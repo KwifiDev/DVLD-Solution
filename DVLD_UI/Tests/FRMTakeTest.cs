@@ -18,9 +18,9 @@ namespace DVLD_UI.Froms
             _testType = testType;
         }
 
-        private void FRMTakeTest_Load(object sender, EventArgs e)
+        private async void FRMTakeTest_Load(object sender, EventArgs e)
         {
-            ucScheduleTestInfo1.LoadData(_testAppointmentID, _testType);
+            await ucScheduleTestInfo1.LoadData(_testAppointmentID, _testType);
 
             if (ucScheduleTestInfo1.IsTestTaken)
             {

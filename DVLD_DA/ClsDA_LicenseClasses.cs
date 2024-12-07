@@ -4,15 +4,26 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
 
 namespace DVLD_DA
 {
     public class ClsDA_LicenseClasses
     {
-        public static bool GetLicenseClassByID(int licenseClassID, ref string className, ref string classDescription,
-                                        ref byte minimumAllowedAge, ref byte defaultValidityLength, ref float classFees)
+        public class Data
         {
-            bool isFound = false;
+            public bool IsFound { get; set; }
+            public int LicenseClassID { get; set; }
+            public string ClassName { get; set; }
+            public string ClassDescription { get; set; }
+            public byte MinimumAllowedAge { get; set; }
+            public byte DefaultValidityLength { get; set; }
+            public float ClassFees { get; set; }
+        }
+
+        public static async Task<Data> GetLicenseClassByID(int licenseClassID)
+        {
+            Data licenseClass = null;
 
             string query = @"SELECT * FROM LicenseClasses WHERE LicenseClassID = @LicenseClassID";
 
@@ -24,18 +35,23 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            className = reader["ClassName"] as string;
-                            classDescription = reader["ClassDescription"] as string;
-                            minimumAllowedAge = (byte)reader["MinimumAllowedAge"];
-                            defaultValidityLength = (byte)reader["DefaultValidityLength"];
-                            classFees = Convert.ToSingle(reader["ClassFees"]);
+                            licenseClass = new Data
+                            {
+                                IsFound = true,
+                                LicenseClassID = licenseClassID,
+                                ClassName = reader["ClassName"] as string,
+                                ClassDescription = reader["ClassDescription"] as string,
+                                MinimumAllowedAge = (byte)reader["MinimumAllowedAge"],
+                                DefaultValidityLength = (byte)reader["DefaultValidityLength"],
+                                ClassFees = Convert.ToSingle(reader["ClassFees"])
+                            };
+                           
                         }
                     }
 
@@ -46,11 +62,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return licenseClass;
             }
         }
 
-        public static bool UpdateLicenseClass(int licenseClassID, string className, string classDescription, byte minimumAllowedAge,
+        public static async Task<bool> UpdateLicenseClass(int licenseClassID, string className, string classDescription, byte minimumAllowedAge,
                                                 byte defaultValidityLength, float classFees)
         {
             bool isUpdated = false;
@@ -76,8 +92,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -90,7 +106,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllLicenseClassesLong()
+        public static async Task<DataTable> GetAllLicenseClassesLong()
         {
             DataTable dt_LicenseClasses = new DataTable();
 
@@ -101,9 +117,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_LicenseClasses.Load(reader);
                     }
@@ -119,7 +135,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllLicenseClassesShort()
+        public static async Task<DataTable> GetAllLicenseClassesShort()
         {
             DataTable dt_LicenseClasses = new DataTable();
 
@@ -130,9 +146,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_LicenseClasses.Load(reader);
                     }
@@ -148,7 +164,7 @@ namespace DVLD_DA
             }
         }
 
-        public static string GetLicenseClassNameByID(int licenseClassID)
+        public static async Task<string> GetLicenseClassNameByID(int licenseClassID)
         {
             string className = "";
 
@@ -162,9 +178,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    object nameClass = command.ExecuteScalar();
+                    object nameClass = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     className = nameClass != null ? nameClass.ToString() : null;
 
                 }
@@ -178,7 +194,7 @@ namespace DVLD_DA
             }
         }
 
-        public static string GetLicenseClassNameByLDLApplicationID(int localDrivingLicenseApplicationID)
+        public static async Task<string> GetLicenseClassNameByLDLApplicationID(int localDrivingLicenseApplicationID)
         {
             string className = "";
 
@@ -195,9 +211,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    object nameClass = command.ExecuteScalar();
+                    object nameClass = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     className = nameClass != null ? nameClass.ToString() : null;
 
                 }
@@ -211,7 +227,7 @@ namespace DVLD_DA
             }
         }
 
-        public static float GetClassFeesByID(int licenseClassID)
+        public static async Task<float> GetClassFeesByID(int licenseClassID)
         {
             float classFees = 0;
 
@@ -225,9 +241,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    classFees = Convert.ToSingle(command.ExecuteScalar());
+                    classFees = Convert.ToSingle(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
                 }
                 catch (Exception ex)

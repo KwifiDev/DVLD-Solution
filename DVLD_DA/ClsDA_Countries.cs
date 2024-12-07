@@ -57,7 +57,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllCountries()
+        public static async Task<DataTable> GetAllCountries()
         {
             DataTable dt_Countries = new DataTable();
 
@@ -68,9 +68,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_Countries.Load(reader);
                     }

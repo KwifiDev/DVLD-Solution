@@ -27,9 +27,9 @@ namespace DVLD_UI.UserControls
             LoadDefaultDataToControls();
         }
 
-        private void LoadDefaultDataToControls()
+        private async void LoadDefaultDataToControls()
         {
-            lblApplicationFees.Text = ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.ReleaseDetainedLicsense).ToString();
+            lblApplicationFees.Text = (await ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.ReleaseDetainedLicsense)).ToString();
         }
 
         public async Task LoadDetainedLicense(ClsBL_License selectedLicense)

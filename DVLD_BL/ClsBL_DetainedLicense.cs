@@ -1,5 +1,6 @@
 ﻿using DVLD_DA;
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -52,8 +53,9 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static async Task<ClsBL_DetainedLicense> CreateAsync(int detainID, int licenseID, DateTime detainDate, float fineFees, int createdByUserID,
-                                      bool isReleased, DateTime? releaseDate, int? releasedByUserID, int? releaseApplicationID)
+        public static async Task<ClsBL_DetainedLicense> CreateAsync(int detainID, int licenseID, DateTime detainDate,
+                                                float fineFees, int createdByUserID, bool isReleased,
+                                                DateTime? releaseDate, int? releasedByUserID, int? releaseApplicationID)
         {
             ClsBL_DetainedLicense detainedLicense = new ClsBL_DetainedLicense(detainID, licenseID, detainDate, fineFees,
                 createdByUserID, isReleased, releaseDate, releasedByUserID, releaseApplicationID)
@@ -67,29 +69,25 @@ namespace DVLD_BL
 
         public static async Task<ClsBL_DetainedLicense> Find(int detainID)
         {
-            int licenseID = -1, createdByUserID = -1;
-            int? releasedByUserID = -1, releaseApplicationID = -1;
-            DateTime detainDate = DateTime.Now;
-            DateTime? releaseDate = DateTime.Now;
-            float fineFees = 0;
-            bool isReleased = false;
 
-            if (ClsDA_DetainedLicenses.GetDetainedLicenseByID(detainID, ref licenseID, ref detainDate, ref fineFees,
-                ref createdByUserID, ref isReleased, ref releaseDate, ref releasedByUserID, ref releaseApplicationID))
+            ClsDA_DetainedLicenses.Data data = await ClsDA_DetainedLicenses.GetDetainedLicenseByID(detainID);
+
+            if (data != null && data.IsFound)
             {
-                return await CreateAsync(detainID, licenseID, detainDate, fineFees, createdByUserID,
-                                                 isReleased, releaseDate, releasedByUserID, releaseApplicationID).ConfigureAwait(false);
+                return await CreateAsync(detainID, data.LicenseID, data.DetainDate, data.FineFees, data.CreatedByUserID,
+                                                 data.IsReleased, data.ReleaseDate, data.ReleasedByUserID,
+                                                 data.ReleaseApplicationID).ConfigureAwait(false);
             }
             else return null;
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
                 case EnMode.Add:
                     {
-                        if (_Add())
+                        if (await _Add())
                         {
                             enMode = EnMode.Update;
                             return true;
@@ -98,7 +96,7 @@ namespace DVLD_BL
                     }
                 case EnMode.Update:
                     {
-                        return _Update();
+                        return await _Update();
                     }
 
             }
@@ -106,51 +104,46 @@ namespace DVLD_BL
             return false;
         }
 
-        private bool _Add()
+        private async Task<bool> _Add()
         {
-            DetainID = ClsDA_DetainedLicenses.AddNewDetainedLicense(LicenseID, DetainDate, FineFees, CreatedByUserID);
+            DetainID = await ClsDA_DetainedLicenses.AddNewDetainedLicense(LicenseID, DetainDate, FineFees, CreatedByUserID);
             return (DetainID > 0);
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_DetainedLicenses.UpdateDetainedLicense(DetainID, IsReleased, ReleaseDate, ReleasedByUserID, ReleaseApplicationID);
+            return await ClsDA_DetainedLicenses.UpdateDetainedLicense(DetainID, IsReleased, ReleaseDate, ReleasedByUserID, ReleaseApplicationID);
         }
 
-        public static bool IsDetained(int licenseID)
+        public static async Task<bool> IsDetained(int licenseID)
         {
-            return ClsDA_DetainedLicenses.IsDetained(licenseID);
+            return await ClsDA_DetainedLicenses.IsDetained(licenseID);
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_DetainedLicenses.GetAllDetainedLicenses();
+            return await ClsDA_DetainedLicenses.GetAllDetainedLicenses();
         }
 
-        public static DataTable LoadView()
+        public static async Task<DataTable> LoadView()
         {
-            return ClsDA_DetainedLicenses.GetAllDetainedLicenses_View();
+            return await ClsDA_DetainedLicenses.GetAllDetainedLicenses_View();
         }
 
-        public static ClsBL_DetainedLicense FindByLicenseID(int licenseID)
+        public static async Task<ClsBL_DetainedLicense> FindByLicenseID(int licenseID)
         {
-            int detainID = -1, createdByUserID = -1;
-            int? releasedByUserID = -1, releaseApplicationID = -1;
-            DateTime detainDate = DateTime.Now;
-            DateTime? releaseDate = DateTime.Now;
-            float fineFees = 0;
-            bool isReleased = false;
+            ClsDA_DetainedLicenses.Data data = await ClsDA_DetainedLicenses.GetDetainedLicenseByLicenseID(licenseID);
 
-            if (ClsDA_DetainedLicenses.GetDetainedLicenseByLicenseID(ref detainID, licenseID, ref detainDate, ref fineFees,
-                ref createdByUserID, ref isReleased, ref releaseDate, ref releasedByUserID, ref releaseApplicationID))
+            if (data != null && data.IsFound)
             {
-                return new ClsBL_DetainedLicense(detainID, licenseID, detainDate, fineFees, createdByUserID,
-                                                 isReleased, releaseDate, releasedByUserID, releaseApplicationID);
+                return await CreateAsync(data.DetainID, data.LicenseID, data.DetainDate, data.FineFees,
+                                                 data.CreatedByUserID, data.IsReleased, data.ReleaseDate,
+                                                 data.ReleasedByUserID, data.ReleaseApplicationID).ConfigureAwait(false);
             }
             else return null;
         }
 
-        internal bool ReleaseLicense(int releasedByUserID, int releaseApplicationID)
+        internal async Task<bool> ReleaseLicense(int releasedByUserID, int releaseApplicationID)
         {
             if (IsReleased) return false;
 
@@ -159,14 +152,14 @@ namespace DVLD_BL
             ReleasedByUserID = releasedByUserID;
             ReleaseApplicationID = releaseApplicationID;
 
-            return Save();
+            return await Save();
         }
 
-        internal bool ReleaseLicenseV2(int releasedByUserID, int releaseApplicationID)
+        internal async Task<bool> ReleaseLicenseV2(int releasedByUserID, int releaseApplicationID)
         {
             if (IsReleased) return false;
 
-            return ClsDA_DetainedLicenses.ReleaseDetainedLicense(DetainID, releasedByUserID, releaseApplicationID);
+            return await ClsDA_DetainedLicenses.ReleaseDetainedLicense(DetainID, releasedByUserID, releaseApplicationID);
         }
     }
 }

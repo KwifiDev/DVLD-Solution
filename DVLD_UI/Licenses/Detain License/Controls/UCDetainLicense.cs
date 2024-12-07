@@ -48,14 +48,14 @@ namespace DVLD_UI.UserControls
             nudFineFees.Enabled = isEnabled;
         }
 
-        private void BtnDetainLicense_Click(object sender, EventArgs e)
+        private async void BtnDetainLicense_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to detain this license?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
             {
                 return;
             }
 
-            bool isDetained = _license.Detain((float)nudFineFees.Value, ClsGlobal.LoginUser.UserID);
+            bool isDetained = await _license.Detain((float)nudFineFees.Value, ClsGlobal.LoginUser.UserID);
 
             if (!isDetained)
             {

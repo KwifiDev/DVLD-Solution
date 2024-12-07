@@ -2,6 +2,7 @@
 using DVLD_UI.Properties;
 using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -40,7 +41,7 @@ namespace DVLD_UI.UserControls
             InitializeComponent();
         }
 
-        public void LoadData(int testAppointmentID, ClsBL_TestType.EnType testType)
+        public async Task LoadData(int testAppointmentID, ClsBL_TestType.EnType testType)
         {
 
             _testType = testType;
@@ -51,7 +52,7 @@ namespace DVLD_UI.UserControls
             Test = ClsBL_Test.Find(testAppointmentID);
 
             int ldlApplicationID = _testAppointment.LocalDrivingLicenseApplicationID;
-            string className = ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(ldlApplicationID);
+            string className = await ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(ldlApplicationID);
             string fullName = ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(ldlApplicationID);
             int testTrials = ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(ldlApplicationID, testType);
             DateTime appointmentDate = _testAppointment.AppointmentDate;

@@ -58,7 +58,7 @@ namespace DVLD_UI.UserControls
             _ldlApplicationID = ldlApplicationID;
             TestType = testType;
 
-            _className = ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(_ldlApplicationID);
+            _className = await ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(_ldlApplicationID);
             _fullName = ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(_ldlApplicationID);
             TestTrials = ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(_ldlApplicationID, _testType);
 

@@ -6,6 +6,7 @@ using System.Data;
 using System.Windows.Forms;
 using static DVLD_UI.ClsGlobal;
 using static DVLD_BL.ClsBL_User;
+using System.Threading.Tasks;
 
 
 namespace DVLD_UI
@@ -20,17 +21,17 @@ namespace DVLD_UI
             dgvDetainedLicenses.MouseDown += DgvDetainedLicenses_MouseDown;
         }
 
-        private void LoadDetainedLicensesDataToGridView()
+        private async Task LoadDetainedLicensesDataToGridView()
         {
-            _allDetainedLicenseTB = ClsBL_DetainedLicense.LoadView();
+            _allDetainedLicenseTB = await ClsBL_DetainedLicense.LoadView();
 
             dgvDetainedLicenses.DataSource = _allDetainedLicenseTB;
             ucFilter1.LinkFilterWithDataTable(ref _allDetainedLicenseTB);
         }
 
-        private void FRMManageDetainedLicenses_Load(object sender, EventArgs e)
+        private async void FRMManageDetainedLicenses_Load(object sender, EventArgs e)
         {
-            LoadDetainedLicensesDataToGridView();
+            await LoadDetainedLicensesDataToGridView();
             InitializePermissions();
         }
 
@@ -62,13 +63,13 @@ namespace DVLD_UI
             return ClsBL_License.FindPersonIDByID(licenseID);
         }
 
-        private void ShowPersonDetails()
+        private async void ShowPersonDetails()
         {
             int personID = GetPersonID();
 
             FRMPersonDetails personDetails = new FRMPersonDetails(personID);
             personDetails.ShowDialog();
-            LoadDetainedLicensesDataToGridView();
+            await LoadDetainedLicensesDataToGridView();
         }
 
         private void BtnShowPersonDetails_Click(object sender, EventArgs e)
@@ -76,11 +77,11 @@ namespace DVLD_UI
             ShowPersonDetails();
         }
 
-        private void BtnReleaseDetainedLicense_Click(object sender, EventArgs e)
+        private async void BtnReleaseDetainedLicense_Click(object sender, EventArgs e)
         {
             int licenseID = (int)dgvDetainedLicenses.CurrentRow.Cells["LicenseID"].Value;
 
-            if (!ClsBL_DetainedLicense.IsDetained(licenseID))
+            if (!await ClsBL_DetainedLicense.IsDetained(licenseID))
             {
                 MessageBox.Show("This License Already Released", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -88,7 +89,7 @@ namespace DVLD_UI
 
             FRMReleaseLicenseApplication releaseLicense = new FRMReleaseLicenseApplication(licenseID);
             releaseLicense.ShowDialog();
-            LoadDetainedLicensesDataToGridView();
+            await LoadDetainedLicensesDataToGridView();
         }
 
         private void BtnShowPersonLicenseHistory_Click(object sender, EventArgs e)
@@ -106,23 +107,23 @@ namespace DVLD_UI
             licenseInfo.ShowDialog();
         }
 
-        private void BtnDetainLicense_Click(object sender, EventArgs e)
+        private async void BtnDetainLicense_Click(object sender, EventArgs e)
         {
             FRMDetainLicense detainLicense = new FRMDetainLicense();
             detainLicense.ShowDialog();
-            LoadDetainedLicensesDataToGridView();
+            await LoadDetainedLicensesDataToGridView();
         }
 
-        private void BtnReleaseLicense_Click(object sender, EventArgs e)
+        private async void BtnReleaseLicense_Click(object sender, EventArgs e)
         {
             FRMReleaseLicenseApplication releaseLicenseApplication = new FRMReleaseLicenseApplication();
             releaseLicenseApplication.ShowDialog();
-            LoadDetainedLicensesDataToGridView();
+            await LoadDetainedLicensesDataToGridView();
         }
 
-        private void BtnRefresh_Click(object sender, EventArgs e)
+        private async void BtnRefresh_Click(object sender, EventArgs e)
         {
-            LoadDetainedLicensesDataToGridView();
+            await LoadDetainedLicensesDataToGridView();
         }
 
         private void ContextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)

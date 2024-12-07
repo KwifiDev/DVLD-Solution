@@ -30,11 +30,11 @@ namespace DVLD_UI.UserControls
                 return false;
             }
 
-            FillControlsWithData();
+            await FillControlsWithData();
             return true;
         }
 
-        private void FillControlsWithData()
+        private async Task FillControlsWithData()
         {
             lblClassName.Text = _license.LicenseClassInfo.ClassName;
             lblFullName.Text = _license.DriverInfo.PersonInfo.FullName;
@@ -48,7 +48,7 @@ namespace DVLD_UI.UserControls
             lblDateOfBrith.Text = _license.DriverInfo.PersonInfo.DateOfBirth.ToShortDateString();
             lblDriverID.Text = _license.DriverID.ToString();
             lblLicenseExpirationDate.Text = _license.ExpirationDate.ToShortDateString();
-            lblLicesneIsDetained.Text = _license.GetIsDetainedText();
+            lblLicesneIsDetained.Text = await _license.GetIsDetainedText();
             pbPersonImage.ImageLocation = _license.DriverInfo.PersonInfo.ImagePath ?? GetDefaultImage();
         }
 

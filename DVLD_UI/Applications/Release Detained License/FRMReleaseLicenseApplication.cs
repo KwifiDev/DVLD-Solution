@@ -29,7 +29,7 @@ namespace DVLD_UI.Froms
 
         private async void UcFindLicense1_OnLicenseFoundAndActive(ClsBL_License license)
         {
-            if (!license.IsDetained())
+            if (!await license.IsDetained())
             {
                 MessageBox.Show("This License Didn't Detain", "Info", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 ucReleaseLicenseApplication1.ResetControls();

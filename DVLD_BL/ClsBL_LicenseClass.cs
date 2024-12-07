@@ -40,30 +40,41 @@ namespace DVLD_BL
             ClassFees = classFees;
         }
 
-        public static ClsBL_LicenseClass Find(int licenseClassID)
+        public static async Task<ClsBL_LicenseClass> Find(int licenseClassID)
         {
-            string className = "", classDescription = "";
-            byte minimumAllowedAge = 0, defaultValidityLength = 0;
-            float classFees = 0.0f;
+            ClsDA_LicenseClasses.Data data = await ClsDA_LicenseClasses.GetLicenseClassByID(licenseClassID);
 
-            if (ClsDA_LicenseClasses.GetLicenseClassByID(licenseClassID, ref className, ref classDescription, ref minimumAllowedAge, ref defaultValidityLength, ref classFees))
+            if (data != null && data.IsFound)
             {
-                return new ClsBL_LicenseClass(licenseClassID, className, classDescription, minimumAllowedAge, defaultValidityLength, classFees);
+                return new ClsBL_LicenseClass(licenseClassID, data.ClassName, data.ClassDescription,
+                    data.MinimumAllowedAge, data.DefaultValidityLength, data.ClassFees);
             }
             else return null;
         }
 
-        public static DataTable LoadShort()
+        //private static async Task<ClsBL_LicenseClass> CreateAsync(int licenseClassID, string className,
+        //    string classDescription, byte minimumAllowedAge, byte defaultValidityLength, float classFees)
+        //{
+        //    ClsBL_LicenseClass licenseClass = new ClsBL_LicenseClass(licenseClassID, className,
+        //    classDescription, minimumAllowedAge, defaultValidityLength, classFees)
+        //    {
+        //        // Async Code Here
+        //    };
+
+        //    return licenseClass;
+        //}
+
+        public static async Task<DataTable> LoadShort()
         {
-            return ClsDA_LicenseClasses.GetAllLicenseClassesShort();
+            return await ClsDA_LicenseClasses.GetAllLicenseClassesShort();
         }
 
-        public static DataTable LoadLong()
+        public static async Task<DataTable> LoadLong()
         {
-            return ClsDA_LicenseClasses.GetAllLicenseClassesLong();
+            return await ClsDA_LicenseClasses.GetAllLicenseClassesLong();
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
@@ -71,25 +82,25 @@ namespace DVLD_BL
                     // Code Here
                     return false;
                 case EnMode.Update:
-                    return _Update();
+                    return await _Update();
             }
 
             return false;
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_LicenseClasses.UpdateLicenseClass(LicenseClassID, ClassName, ClassDescription, MinimumAllowedAge, DefaultValidityLength, ClassFees);
+            return await ClsDA_LicenseClasses.UpdateLicenseClass(LicenseClassID, ClassName, ClassDescription, MinimumAllowedAge, DefaultValidityLength, ClassFees);
         }
 
-        public static float FindClassFeesByID(int licenseClassID)
+        public static async Task<float> FindClassFeesByID(int licenseClassID)
         {
-            return ClsDA_LicenseClasses.GetClassFeesByID(licenseClassID);
+            return await ClsDA_LicenseClasses.GetClassFeesByID(licenseClassID);
         }
 
-        internal static string GetLicenseClassNameByLDLApplicationID(int localDrivingLicenseApplicationID)
+        internal static async Task<string> GetLicenseClassNameByLDLApplicationID(int localDrivingLicenseApplicationID)
         {
-            return ClsDA_LicenseClasses.GetLicenseClassNameByLDLApplicationID(localDrivingLicenseApplicationID);
+            return await ClsDA_LicenseClasses.GetLicenseClassNameByLDLApplicationID(localDrivingLicenseApplicationID);
         }
     }
 }
