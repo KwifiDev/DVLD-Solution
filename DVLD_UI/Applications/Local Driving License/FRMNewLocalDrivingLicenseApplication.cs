@@ -68,10 +68,10 @@ namespace DVLD_UI.Froms
             }
         }
 
-        private void FillDefaultDataApplicationControls()
+        private async void FillDefaultDataApplicationControls()
         {
             lblApplicationDate.Text = ClsFormat.DateToShort(DateTime.Now);
-            lblApplicationFees.Text = ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.NewLocalDrivingLicense).ApplicationFees.ToString();
+            lblApplicationFees.Text = (await ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.NewLocalDrivingLicense)).ApplicationFees.ToString();
             lblCreatedByUser.Text = ClsGlobal.LoginUser.UserName;
         }
 

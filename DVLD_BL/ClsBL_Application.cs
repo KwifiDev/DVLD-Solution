@@ -24,7 +24,7 @@ namespace DVLD_BL
             {
                 if (value < 1 || value > 7) return;
                 _applicationTypeID = value;
-                PaidFees = ClsBL_ApplicationType.FindApplicationFeesByID(_applicationTypeID);
+                SetPaidFeesAsync();
             }
         }
         public EnStatus ApplicationStatus { get; set; }
@@ -39,6 +39,11 @@ namespace DVLD_BL
         public string GetApplicationStatusText()
         {
             return ApplicationStatus.ToString();
+        }
+
+        public async void SetPaidFeesAsync()
+        {
+            PaidFees = await ClsBL_ApplicationType.FindApplicationFeesByID(_applicationTypeID);
         }
 
         protected ClsBL_Application(int applicationID, int applicantPersonID, DateTime applicationDate, int applicationTypeID,
@@ -68,7 +73,7 @@ namespace DVLD_BL
             {
                 ApplicantPersonInfo = await ClsBL_Person.Find(applicantPersonID),
                 UserInfo = await ClsBL_User.Find(createdByUserID),
-                ApplicationTypeInfo = ClsBL_ApplicationType.Find(applicationTypeID)
+                ApplicationTypeInfo = await ClsBL_ApplicationType.Find(applicationTypeID)
             };
 
             return application;
@@ -90,16 +95,13 @@ namespace DVLD_BL
 
         public static async Task<ClsBL_Application> Find(int applicationID)
         {
-            int personID = -1, applicationTypeID = -1, createdByUserID = -1;
-            float paidFees = 0;
-            byte applicationStatus = 0;
-            DateTime applicationDate = DateTime.Now, lastStatusDate = DateTime.Now;
+            ClsDA_Applications.Data data = await ClsDA_Applications.GetApplicationByID(applicationID);
 
-            if (ClsDA_Applications.GetApplicationByID(applicationID, ref personID, ref applicationDate, ref applicationTypeID,
-                                                ref applicationStatus, ref lastStatusDate, ref paidFees, ref createdByUserID))
+            if (data != null && data.IsFound)
             {
-                return await CreateAsync(applicationID, personID, applicationDate, applicationTypeID,
-                             (EnStatus)applicationStatus, lastStatusDate, paidFees, createdByUserID).ConfigureAwait(false);
+                return await CreateAsync(applicationID, data.ApplicantPersonID, data.ApplicationDate,
+                                        data.ApplicationTypeID,(EnStatus)data.ApplicationStatus, data.LastStatusDate,
+                                        data.PaidFees, data.CreatedByUserID).ConfigureAwait(false);
             }
             else return null;
         }

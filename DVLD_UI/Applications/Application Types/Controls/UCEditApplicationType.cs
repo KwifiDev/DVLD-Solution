@@ -1,6 +1,7 @@
 ﻿using ComponentFactory.Krypton.Toolkit;
 using DVLD_BL;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -13,9 +14,9 @@ namespace DVLD_UI.UserControls
             InitializeComponent();
         }
 
-        public void LoadApplicationTypeByID(int applicationTypeID)
+        public async Task LoadApplicationTypeByID(int applicationTypeID)
         {
-            _applicationType = ClsBL_ApplicationType.Find(applicationTypeID);
+            _applicationType = await ClsBL_ApplicationType.Find(applicationTypeID);
 
             if (_applicationType == null)
             {
@@ -34,7 +35,7 @@ namespace DVLD_UI.UserControls
             nudApplicationTypeFees.Value = (decimal)_applicationType.ApplicationFees;
         }
 
-        private void BtnUpdate_Click(object sender, EventArgs e)
+        private async void BtnUpdate_Click(object sender, EventArgs e)
         {
             if (!FieldsIsValid())
             {
@@ -44,7 +45,7 @@ namespace DVLD_UI.UserControls
 
             _applicationType = LoadDataToObject(_applicationType);
 
-            if (_applicationType.Save())
+            if (await _applicationType.Save())
             {
                 MessageBox.Show("Application Type Saved Successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

@@ -15,9 +15,9 @@ namespace DVLD_UI.Froms
             _internationalLicenseID = internationalLicenseID;
         }
 
-        private void FRMNewInternationalLicenseApplication_Load(object sender, EventArgs e)
+        private async void FRMNewInternationalLicenseApplication_Load(object sender, EventArgs e)
         {
-            ucInterNationalApplicationInfo1.LoadDefaultData();
+            await ucInterNationalApplicationInfo1.LoadDefaultData();
 
             if (_internationalLicenseID != -1) ucFindLicense1.SelectLicense(_internationalLicenseID);
         }

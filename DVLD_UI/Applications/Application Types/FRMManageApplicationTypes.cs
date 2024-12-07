@@ -1,6 +1,7 @@
 ﻿using ComponentFactory.Krypton.Toolkit;
 using DVLD_BL;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.Froms
@@ -12,27 +13,27 @@ namespace DVLD_UI.Froms
             InitializeComponent();
         }
 
-        private void FRMManageApplicationTypes_Load(object sender, EventArgs e)
+        private async void FRMManageApplicationTypes_Load(object sender, EventArgs e)
         {
-            LoadApplicationTypesToGridView();
+            await LoadApplicationTypesToGridView();
         }
 
-        private void LoadApplicationTypesToGridView()
+        private async Task LoadApplicationTypesToGridView()
         {
-            dgvApplicationTypes.DataSource = ClsBL_ApplicationType.Load();
+            dgvApplicationTypes.DataSource = await ClsBL_ApplicationType.Load();
         }
 
-        private void BtnEditApplicationType_Click(object sender, EventArgs e)
+        private async void BtnEditApplicationType_Click(object sender, EventArgs e)
         {
             int applicationTypeID = (int)dgvApplicationTypes.CurrentRow.Cells[0].Value;
             FRMEditApplicationType editApplicationType = new FRMEditApplicationType(applicationTypeID);
             editApplicationType.ShowDialog();
-            LoadApplicationTypesToGridView();
+            await LoadApplicationTypesToGridView();
         }
 
-        private void BtnRefreshData_Click(object sender, EventArgs e)
+        private async void BtnRefreshData_Click(object sender, EventArgs e)
         {
-            LoadApplicationTypesToGridView();
+            await LoadApplicationTypesToGridView();
         }
 
         private void DgvApplicationTypes_MouseDown(object sender, MouseEventArgs e)

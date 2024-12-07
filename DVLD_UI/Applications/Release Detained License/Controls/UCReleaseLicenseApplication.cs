@@ -1,6 +1,7 @@
 ﻿using DVLD_BL;
 using DVLD_UI.Froms;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -31,24 +32,24 @@ namespace DVLD_UI.UserControls
             lblApplicationFees.Text = ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.ReleaseDetainedLicsense).ToString();
         }
 
-        public void LoadDetainedLicense(ClsBL_License selectedLicense)
+        public async Task LoadDetainedLicense(ClsBL_License selectedLicense)
         {
             _selectedLicense = selectedLicense;
 
             if (_selectedLicense == null) return;
 
-            LoadDetainedLicenseDataToControls();
+            await LoadDetainedLicenseDataToControls();
 
             EnableControls(isEnabled: true);
         }
 
-        private void LoadDetainedLicenseDataToControls()
+        private async Task LoadDetainedLicenseDataToControls()
         {
             lblLicenseID.Text = _selectedLicense.DetainedInfo.LicenseID.ToString();
             lblDetainID.Text = _selectedLicense.DetainedInfo.DetainID.ToString();
             lblDetainDate.Text = _selectedLicense.DetainedInfo.DetainDate.ToShortDateString();
             lblFineFees.Text = _selectedLicense.DetainedInfo.FineFees.ToString();
-            lblTotalFees.Text = (_selectedLicense.DetainedInfo.FineFees + ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.ReleaseDetainedLicsense)).ToString();
+            lblTotalFees.Text = (_selectedLicense.DetainedInfo.FineFees + await ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.ReleaseDetainedLicsense)).ToString();
             lblCreatedByUser.Text = _selectedLicense.DetainedInfo.CreatedByUserInfo.UserName;
         }
 

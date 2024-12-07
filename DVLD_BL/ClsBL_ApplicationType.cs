@@ -1,6 +1,6 @@
 ﻿using DVLD_DA;
-using System;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace DVLD_BL
 {
@@ -30,24 +30,33 @@ namespace DVLD_BL
             ApplicationFees = applicationFees;
         }
 
-        public static ClsBL_ApplicationType Find(int applicationTypeID)
-        {
-            string applicationTypeTitle = "";
-            float applicationFees = 0.0f;
+        //public static async Task<ClsBL_ApplicationType> CreateAsync(int applicationTypeID, string applicationTypeTitle, float applicationFees)
+        //{
+        //    ClsBL_ApplicationType applicationType = new ClsBL_ApplicationType((int)applicationTypeID, applicationTypeTitle, applicationFees)
+        //    {
+        //        // Async Code Here
+        //    };
 
-            if (ClsDA_ApplicationTypes.GetApplicationTypeByID(applicationTypeID, ref applicationTypeTitle, ref applicationFees))
+        //    return applicationType;
+        //}
+
+        public static async Task<ClsBL_ApplicationType> Find(int applicationTypeID)
+        {
+            ClsDA_ApplicationTypes.Data data = await ClsDA_ApplicationTypes.GetApplicationTypeByID(applicationTypeID);
+
+            if (data != null && data.IsFound)
             {
-                return new ClsBL_ApplicationType((int)applicationTypeID, applicationTypeTitle, applicationFees);
+                return new ClsBL_ApplicationType((int)applicationTypeID, data.ApplicationTypeTitle, data.ApplicationFees);
             }
             else return null;
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_ApplicationTypes.GetAllApplicationTypes();
+            return await ClsDA_ApplicationTypes.GetAllApplicationTypes();
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
@@ -55,20 +64,20 @@ namespace DVLD_BL
                     // Code Here
                     return false;
                 case EnMode.Update:
-                    return _Update();
+                    return await _Update();
             }
 
             return false;
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_ApplicationTypes.UpdateApplicationType(ApplicationTypeID, ApplicationTypeTitle, ApplicationFees);
+            return await ClsDA_ApplicationTypes.UpdateApplicationType(ApplicationTypeID, ApplicationTypeTitle, ApplicationFees);
         }
 
-        public static float FindApplicationFeesByID(int applicationTypeID)
+        public static async Task<float> FindApplicationFeesByID(int applicationTypeID)
         {
-            return ClsDA_ApplicationTypes.GetApplcationFeesByID(applicationTypeID);
+            return await ClsDA_ApplicationTypes.GetApplcationFeesByID(applicationTypeID);
         }
     }
 }

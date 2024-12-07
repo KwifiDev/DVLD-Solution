@@ -13,9 +13,9 @@ namespace DVLD_UI.Froms
             _applicationTypeID = applicationTypeID;
         }
 
-        private void FRMEditApplicationType_Load(object sender, EventArgs e)
+        private async void FRMEditApplicationType_Load(object sender, EventArgs e)
         {
-            ucEditApplicationType1.LoadApplicationTypeByID(_applicationTypeID);
+            await ucEditApplicationType1.LoadApplicationTypeByID(_applicationTypeID);
         }
     }
 }

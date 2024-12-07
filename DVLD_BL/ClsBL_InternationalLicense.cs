@@ -62,7 +62,7 @@ namespace DVLD_BL
                 // Initialize Base OBJ
                 ApplicantPersonInfo = await ClsBL_Person.Find(applicantPersonID),
                 UserInfo = await ClsBL_User.Find(createdByUserID),
-                ApplicationTypeInfo = ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.NewInternationalLicense),
+                ApplicationTypeInfo = await ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.NewInternationalLicense),
                 
                 // Initialize Sub OBJ
                 DriverInfo = await ClsBL_Driver.Find(driverID)

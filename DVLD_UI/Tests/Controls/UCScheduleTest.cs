@@ -119,7 +119,7 @@ namespace DVLD_UI.UserControls
                 _retakeTestApplication = new ClsBL_Application();
 
                 int applicantPersonID = ClsBL_LocalDrivingLicenseApplication.GetPersonIDByID(_ldlApplicationID);
-                float paidFess = ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.RetakeTest).ApplicationFees;
+                float paidFess = (await ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.RetakeTest)).ApplicationFees;
 
                 _retakeTestApplication.ApplicantPersonID = applicantPersonID;
                 _retakeTestApplication.ApplicationTypeID = (int)ClsBL_ApplicationType.EnType.RetakeTest;

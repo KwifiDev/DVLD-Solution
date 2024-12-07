@@ -10,6 +10,18 @@ namespace DVLD_DA
 {
     public static class ClsDA_Applications
     {
+        public class Data
+        {
+            public bool IsFound {  get; set; }
+            public int ApplicationID { get; set; }
+            public int ApplicantPersonID { get; set; }
+            public DateTime ApplicationDate { get; set; }
+            public int ApplicationTypeID { get; set; }
+            public byte ApplicationStatus { get; set; }
+            public DateTime LastStatusDate { get; set; }
+            public float PaidFees { get; set; }
+            public int CreatedByUserID { get; set; }
+        }
         public static async Task<int> AddNewApplication(int applicantPersonID, DateTime applicationDate, int applicationTypeID, byte applicationStatus,
                                             DateTime lastStatusDate, float paidFees, int createdByUserID)
         {
@@ -114,10 +126,9 @@ namespace DVLD_DA
             }
         }
 
-        public static bool GetApplicationByID(int applicationID, ref int applicantPersonID, ref DateTime applicationDate, ref int applicationTypeID, ref byte applicationStatus,
-                                            ref DateTime lastStatusDate, ref float paidFees, ref int createdByUserID)
+        public static async Task<Data> GetApplicationByID(int applicationID)
         {
-            bool isFound = false;
+            Data application = null;
 
             string query = @"SELECT * FROM Applications WHERE ApplicationID = @ApplicationID";
 
@@ -129,21 +140,23 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            applicantPersonID = (int)reader["ApplicantPersonID"];
-                            applicationDate = (DateTime)reader["ApplicationDate"];
-                            applicationTypeID = (int)reader["ApplicationTypeID"];
-                            applicationStatus = (byte)reader["ApplicationStatus"];
-                            lastStatusDate = (DateTime)reader["LastStatusDate"];
-                            paidFees = Convert.ToSingle(reader["PaidFees"]);
-                            createdByUserID = (int)reader["CreatedByUserID"];
-
+                            application = new Data
+                            {
+                                IsFound = true,
+                                ApplicantPersonID = (int)reader["ApplicantPersonID"],
+                                ApplicationDate = (DateTime)reader["ApplicationDate"],
+                                ApplicationTypeID = (int)reader["ApplicationTypeID"],
+                                ApplicationStatus = (byte)reader["ApplicationStatus"],
+                                LastStatusDate = (DateTime)reader["LastStatusDate"],
+                                PaidFees = Convert.ToSingle(reader["PaidFees"]),
+                                CreatedByUserID = (int)reader["CreatedByUserID"],
+                            };
                         }
                     }
 
@@ -154,7 +167,7 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return application;
             }
         }
 

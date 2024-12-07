@@ -27,7 +27,7 @@ namespace DVLD_UI.Froms
             if (_licenseID != -1) ucFindLicense1.SelectLicense(_licenseID);
         }
 
-        private void UcFindLicense1_OnLicenseFoundAndActive(ClsBL_License license)
+        private async void UcFindLicense1_OnLicenseFoundAndActive(ClsBL_License license)
         {
             if (!license.IsDetained())
             {
@@ -36,7 +36,7 @@ namespace DVLD_UI.Froms
                 return;
             }
 
-            ucReleaseLicenseApplication1.LoadDetainedLicense(license);
+            await ucReleaseLicenseApplication1.LoadDetainedLicense(license);
         }
 
         private void UcFindLicense1_OnInvalidLicense()

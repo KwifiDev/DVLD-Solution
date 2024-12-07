@@ -1,6 +1,7 @@
 ﻿using DVLD_BL;
 using DVLD_UI.Froms;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -21,18 +22,18 @@ namespace DVLD_UI.UserControls
             InitializeComponent();
         }
 
-        public void LoadDefaultData()
+        public async Task LoadDefaultData()
         {
-            LoadDefaultDataToObject();
+            await LoadDefaultDataToObject();
             LoadDefaultDataToControls();
         }
 
-        private void LoadDefaultDataToObject()
+        private async Task LoadDefaultDataToObject()
         {
             _internationalLicense = new ClsBL_InternationalLicense
             {
                 ApplicationTypeID = (int)ClsBL_ApplicationType.EnType.NewInternationalLicense,
-                PaidFees = ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.NewInternationalLicense),
+                PaidFees = await ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.NewInternationalLicense),
                 CreatedByUserID = ClsGlobal.LoginUser.UserID,
                 ApplicationStatus = ClsBL_Application.EnStatus.Completed
             };

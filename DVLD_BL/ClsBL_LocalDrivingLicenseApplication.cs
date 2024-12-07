@@ -46,7 +46,7 @@ namespace DVLD_BL
                 // Initialize Base OBJ
                 ApplicantPersonInfo = await ClsBL_Person.Find(applicantPersonID),
                 UserInfo = await ClsBL_User.Find(createdByUserID),
-                ApplicationTypeInfo = ClsBL_ApplicationType.Find(applicationTypeID),
+                ApplicationTypeInfo = await ClsBL_ApplicationType.Find(applicationTypeID),
 
                 // Initialize Sub OBJ
                 LicenseClassInfo = ClsBL_LicenseClass.Find(licenseClassID)
