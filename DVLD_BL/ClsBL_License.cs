@@ -220,7 +220,7 @@ namespace DVLD_BL
             return ClsDA_Licenses.GetActiveLicenseIDByPersonIDAndLicenseClassID(applicantPersonID, licenseClassID);
         }
 
-        public ClsBL_License Renew(string notes, int createdByUserID)
+        public async Task<ClsBL_License> Renew(string notes, int createdByUserID)
         {
             // First We Create Renew Application To Pay Fees Of Renew License Application
             ClsBL_Application renewApp = new ClsBL_Application
@@ -231,7 +231,7 @@ namespace DVLD_BL
                 CreatedByUserID = createdByUserID
             };
 
-            if (!renewApp.Save())
+            if (!await renewApp.Save())
             {
                 return null;
             }
@@ -258,7 +258,7 @@ namespace DVLD_BL
             return newLicense;
         }
 
-        public ClsBL_License Replace(ClsBL_ApplicationType.EnType replacementFor, int createdByUserID)
+        public async Task<ClsBL_License> Replace(ClsBL_ApplicationType.EnType replacementFor, int createdByUserID)
         {
             // First We Create Replacement Application To Pay Fees Of Replacement License
             ClsBL_Application replaceApp = new ClsBL_Application
@@ -269,7 +269,7 @@ namespace DVLD_BL
                 CreatedByUserID = createdByUserID
             };
 
-            if (!replaceApp.Save())
+            if (!await replaceApp.Save())
             {
                 return null;
             }
@@ -311,7 +311,7 @@ namespace DVLD_BL
             }
         }
 
-        public bool Release(int createdByUserID)
+        public async Task<bool> Release(int createdByUserID)
         {
             if (DetainedInfo == null || DetainedInfo.IsReleased) return false;
 
@@ -324,7 +324,7 @@ namespace DVLD_BL
                 CreatedByUserID = createdByUserID
             };
 
-            if (!releaseApp.Save())
+            if (!await releaseApp.Save())
             {
                 return false;
             }

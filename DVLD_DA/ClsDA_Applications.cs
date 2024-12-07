@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using static DVLD_DA.ClsDA_LogManager;
 using static DVLD_DA.ClsDA_Settings;
 
@@ -9,7 +10,7 @@ namespace DVLD_DA
 {
     public static class ClsDA_Applications
     {
-        public static int AddNewApplication(int applicantPersonID, DateTime applicationDate, int applicationTypeID, byte applicationStatus,
+        public static async Task<int> AddNewApplication(int applicantPersonID, DateTime applicationDate, int applicationTypeID, byte applicationStatus,
                                             DateTime lastStatusDate, float paidFees, int createdByUserID)
         {
             int applicationID = -1;
@@ -33,8 +34,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         applicationID = result;
@@ -50,7 +51,7 @@ namespace DVLD_DA
             return applicationID;
         }
 
-        public static bool UpdateApplicationStatus(int applicationID, byte applicationStatus)
+        public static async Task<bool> UpdateApplicationStatus(int applicationID, byte applicationStatus)
         {
             bool isUpdated = false;
 
@@ -68,8 +69,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -82,7 +83,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool DeleteApplication(int applicationID)
+        public static async Task<bool> DeleteApplication(int applicationID)
         {
             bool isDeleted = false;
 
@@ -96,9 +97,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    int affectedRows = command.ExecuteNonQuery();
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 
                     isDeleted = (affectedRows > 0);
 
@@ -157,7 +158,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllApplications()
+        public static async Task<DataTable> GetAllApplications()
         {
             DataTable dt_Applications = new DataTable();
 
@@ -168,9 +169,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_Applications.Load(reader);
                     }
@@ -186,7 +187,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsApplicationExist(int applicationID)
+        public static async Task<bool> IsApplicationExist(int applicationID)
         {
             bool isExist = false;
 
@@ -200,9 +201,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
@@ -215,13 +216,13 @@ namespace DVLD_DA
             }
         }
 
-        public static bool DoesPersonHaveActiveApplication(int applicantPersonID, int ApplicationTypeID)
+        public static async Task<bool> DoesPersonHaveActiveApplication(int applicantPersonID, int ApplicationTypeID)
         {
             //incase the ActiveApplication ID !=-1 return true.
-            return (GetActiveApplicationID(applicantPersonID, ApplicationTypeID) != -1);
+            return (await GetActiveApplicationID(applicantPersonID, ApplicationTypeID) != -1);
         }
 
-        public static int GetActiveApplicationID(int applicantPersonID, int applicationTypeID)
+        public static async Task<int> GetActiveApplicationID(int applicantPersonID, int applicationTypeID)
         {
             int applicationID = -1;
 
@@ -238,8 +239,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         applicationID = result;
@@ -255,7 +256,7 @@ namespace DVLD_DA
             return applicationID;
         }
 
-        public static int GetActiveApplicationIDForLicenseClass(int applicantPersonID, int applicationTypeID, int licenseClassID)
+        public static async Task<int> GetActiveApplicationIDForLicenseClass(int applicantPersonID, int applicationTypeID, int licenseClassID)
         {
             int applicationID = -1;
 
@@ -275,8 +276,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         applicationID = result;

@@ -60,7 +60,7 @@ namespace DVLD_UI.UserControls
             txtLicenseNotes.Enabled = isEnabled;
         }
 
-        private void BtnRenewLicense_Click(object sender, EventArgs e)
+        private async void BtnRenewLicense_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to Renew the license?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
             {
@@ -69,7 +69,7 @@ namespace DVLD_UI.UserControls
 
             string notes = txtLicenseNotes.Text;
 
-            _newLicense = _expirdLicense.Renew(notes, ClsGlobal.LoginUser.UserID);
+            _newLicense = await _expirdLicense.Renew(notes, ClsGlobal.LoginUser.UserID);
 
             if (_newLicense == null) return;
 

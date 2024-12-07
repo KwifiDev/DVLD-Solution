@@ -76,7 +76,7 @@ namespace DVLD_UI.UserControls
                 return;
             }
 
-            if (!_internationalLicense.Save())
+            if (!await _internationalLicense.Save())
             {
                 ShowMessage("Can't Create International License", "Error");
                 return;

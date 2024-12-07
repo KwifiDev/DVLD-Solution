@@ -117,12 +117,12 @@ namespace DVLD_BL
             return GetActiveApplicationID(personID, licenseClassID) > 0;
         }
 
-        public new bool Save()
+        public new async Task<bool> Save()
         {
             //Because of inheritance first we call the save method in the base class,
             //It Will Take care of adding all information to the application table.
 
-            if (!base.Save()) return false;
+            if (!await base.Save()) return false;
 
             switch (enMode)
             {
@@ -164,7 +164,7 @@ namespace DVLD_BL
                    DeleteFullApplication(localDrivingLicenseApplicationID, applicationID);
         }
 
-        private new bool Delete()
+        private new async Task<bool> Delete()
         {
             //First we delete the Local Driving License Application
             bool isLDLApplcationDeleted = ClsDA_LocalDrivingLicenseApplications.
@@ -173,7 +173,7 @@ namespace DVLD_BL
             if (!isLDLApplcationDeleted) return false;
 
             //Then we delete the base Application
-            return base.Delete();
+            return await base.Delete();
 
         }
 
@@ -339,7 +339,7 @@ namespace DVLD_BL
 
             if (license.Save())
             {
-                SetApplicationComplete();
+                await SetApplicationComplete();
                 return license.LicenseID;
             }
 

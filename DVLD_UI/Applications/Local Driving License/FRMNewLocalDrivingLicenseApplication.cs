@@ -111,7 +111,7 @@ namespace DVLD_UI.Froms
             tabControl.AllowTabSelect = false;
         }
 
-        private void BtnCreateLocalLicenseApplication_Click(object sender, EventArgs e)
+        private async void BtnCreateLocalLicenseApplication_Click(object sender, EventArgs e)
         {
             if (IsPersonHaveActiveLicense())
             {
@@ -127,7 +127,7 @@ namespace DVLD_UI.Froms
 
             LoadDataToObject();
 
-            if (_localDrivingLicenseApplication.Save())
+            if (await _localDrivingLicenseApplication.Save())
             {
                 MessageBox.Show("Application Saved Successfuly", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 lblLDLApplicationID.Text = _localDrivingLicenseApplication.LocalDrivingLicenseApplicationID.ToString();

@@ -267,11 +267,11 @@ namespace DVLD_UI.UserControls
             pbTestType.Image = image;
         }
 
-        private bool HandleRetakeTestApplication()
+        private async Task<bool> HandleRetakeTestApplication()
         {
             if (enCreationMode == EnCreationMode.FirstTime) return true; // Else Retake Test
 
-            if (_retakeTestApplication.Save())
+            if (await _retakeTestApplication.Save())
             {
                 lblRetakeApplicationID.Text = _retakeTestApplication.ApplicationID.ToString();
                 _testAppointment.RetakeTestApplicationID = _retakeTestApplication.ApplicationID;
@@ -284,11 +284,11 @@ namespace DVLD_UI.UserControls
             }
         }
 
-        private void BtnSave_Click(object sender, EventArgs e)
+        private async void BtnSave_Click(object sender, EventArgs e)
         {
             SetNewDateToObject();
 
-            if (!HandleRetakeTestApplication()) return;
+            if (!await HandleRetakeTestApplication()) return;
 
             if (_testAppointment.Save())
             {

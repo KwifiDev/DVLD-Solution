@@ -58,14 +58,14 @@ namespace DVLD_UI.UserControls
             btnReleaseLicense.Enabled = isEnabled;
         }
 
-        private void BtnReleaseLicense_Click(object sender, EventArgs e)
+        private async void BtnReleaseLicense_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to release this detained license?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
             {
                 return;
             }
 
-            bool isReleased = _selectedLicense.Release(ClsGlobal.LoginUser.UserID);
+            bool isReleased = await _selectedLicense.Release(ClsGlobal.LoginUser.UserID);
 
             if (!isReleased)
             {

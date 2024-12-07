@@ -104,22 +104,22 @@ namespace DVLD_BL
             else return null;
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_Applications.GetAllApplications();
+            return await ClsDA_Applications.GetAllApplications();
         }
 
-        public static bool IsExist(int applicationID)
+        public static async Task<bool> IsExist(int applicationID)
         {
-            return ClsDA_Applications.IsApplicationExist(applicationID);
+            return await ClsDA_Applications.IsApplicationExist(applicationID);
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
                 case EnMode.Add:
-                    if (_Add())
+                    if (await _Add())
                     {
                         enMode = EnMode.Update;
                         return true;
@@ -127,78 +127,78 @@ namespace DVLD_BL
                     else return false;
 
                 case EnMode.Update:
-                    return _Update();
+                    return await _Update();
 
             }
 
             return false;
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_Applications.UpdateApplicationStatus(ApplicationID, (byte)ApplicationStatus);
+            return await ClsDA_Applications.UpdateApplicationStatus(ApplicationID, (byte)ApplicationStatus);
         }
 
-        private bool _Add()
+        private async Task<bool> _Add()
         {
-            ApplicationID = ClsDA_Applications.AddNewApplication(ApplicantPersonID, ApplicationDate, ApplicationTypeID, (byte)ApplicationStatus,
+            ApplicationID = await ClsDA_Applications.AddNewApplication(ApplicantPersonID, ApplicationDate, ApplicationTypeID, (byte)ApplicationStatus,
                                                                      LastStatusDate, PaidFees, CreatedByUserID);
             return (ApplicationID > 0);
         }
 
-        public static bool Delete(int applicationID)
+        public static async Task<bool> Delete(int applicationID)
         {
-            return ClsDA_Applications.DeleteApplication(applicationID);
+            return await ClsDA_Applications.DeleteApplication(applicationID);
         }
 
-        public bool Delete()
+        public async Task<bool> Delete()
         {
-            return ClsDA_Applications.DeleteApplication(ApplicationID);
+            return await ClsDA_Applications.DeleteApplication(ApplicationID);
         }
 
-        public static bool DoesPersonHaveActiveApplication(int applicantPersonID, int applicationTypeID)
+        public static async Task<bool> DoesPersonHaveActiveApplication(int applicantPersonID, int applicationTypeID)
         {
-            return ClsDA_Applications.DoesPersonHaveActiveApplication(applicantPersonID, applicationTypeID);
+            return await ClsDA_Applications.DoesPersonHaveActiveApplication(applicantPersonID, applicationTypeID);
         }
 
-        public bool DoesPersonHaveActiveApplication(int applicationTypeID)
+        public async Task<bool> DoesPersonHaveActiveApplication(int applicationTypeID)
         {
-            return DoesPersonHaveActiveApplication(ApplicantPersonID, applicationTypeID);
+            return await DoesPersonHaveActiveApplication(ApplicantPersonID, applicationTypeID);
         }
 
-        public static int GetActiveApplicationID(int applicantPersonID, ClsBL_ApplicationType.EnType applicationTypeID)
+        public static async Task<int> GetActiveApplicationID(int applicantPersonID, ClsBL_ApplicationType.EnType applicationTypeID)
         {
-            return ClsDA_Applications.GetActiveApplicationID(applicantPersonID, (int)applicationTypeID);
+            return await ClsDA_Applications.GetActiveApplicationID(applicantPersonID, (int)applicationTypeID);
         }
 
-        public int GetActiveApplicationID(ClsBL_ApplicationType.EnType applicationTypeID)
+        public async Task<int> GetActiveApplicationID(ClsBL_ApplicationType.EnType applicationTypeID)
         {
-            return GetActiveApplicationID(ApplicantPersonID, applicationTypeID);
+            return await GetActiveApplicationID(ApplicantPersonID, applicationTypeID);
         }
 
-        public static int GetActiveApplicationIDForLicenseClass(int applicantPersonID, ClsBL_ApplicationType.EnType applicationTypeID, int licenseClassID)
+        public static async Task<int> GetActiveApplicationIDForLicenseClass(int applicantPersonID, ClsBL_ApplicationType.EnType applicationTypeID, int licenseClassID)
         {
-            return ClsDA_Applications.GetActiveApplicationIDForLicenseClass(applicantPersonID, (int)applicationTypeID, licenseClassID);
+            return await ClsDA_Applications.GetActiveApplicationIDForLicenseClass(applicantPersonID, (int)applicationTypeID, licenseClassID);
         }
 
-        public static bool SetApplicationCompleteByID(int applicationID)
+        public static async Task<bool> SetApplicationCompleteByID(int applicationID)
         {
-            return ClsDA_Applications.UpdateApplicationStatus(applicationID, (byte)EnStatus.Completed);
+            return await ClsDA_Applications.UpdateApplicationStatus(applicationID, (byte)EnStatus.Completed);
         }
 
-        public bool SetApplicationComplete()
+        public async Task<bool> SetApplicationComplete()
         {
-            return SetApplicationCompleteByID(ApplicationID);
+            return await SetApplicationCompleteByID(ApplicationID);
         }
 
-        public static bool SetApplicationCancelByID(int applicationID)
+        public static async Task<bool> SetApplicationCancelByID(int applicationID)
         {
-            return ClsDA_Applications.UpdateApplicationStatus(applicationID, (byte)EnStatus.Cancelled);
+            return await ClsDA_Applications.UpdateApplicationStatus(applicationID, (byte)EnStatus.Cancelled);
         }
 
-        public bool SetApplicationCancel()
+        public async Task<bool> SetApplicationCancel()
         {
-            return SetApplicationCancelByID(ApplicationID);
+            return await SetApplicationCancelByID(ApplicationID);
         }
     }
 }

@@ -58,14 +58,14 @@ namespace DVLD_UI.UserControls
             gbReplacementLicenseMode.Enabled = isEnabled;
         }
 
-        private void BtnReplacementLicense_Click(object sender, EventArgs e)
+        private async void BtnReplacementLicense_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to Issue a Replacement for the license?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
             {
                 return;
             }
 
-            _newLicense = _replacementLicense.Replace(GetReplacementFor(), ClsGlobal.LoginUser.UserID);
+            _newLicense = await _replacementLicense.Replace(GetReplacementFor(), ClsGlobal.LoginUser.UserID);
 
             if (_newLicense == null) return;
 

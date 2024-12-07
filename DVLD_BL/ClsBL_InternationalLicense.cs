@@ -106,11 +106,11 @@ namespace DVLD_BL
             return ClsDA_InternationalLicenses.IsInternationalLicenseExist(internationalLicenseID);
         }
 
-        public new bool Save()
+        public new async Task<bool> Save()
         {
             //Because of inheritance first we call the save method in the base class,
             //it will take care of adding all information to the application table.
-            if (!base.Save()) return false;
+            if (!await base.Save()) return false;
 
             switch (enMode)
             {
