@@ -27,13 +27,14 @@ The system is built using a 3-Tier Architecture:
 - **C#**: Primary programming language.
 
 ## Installation
-1. Clone the repository:
+1. Clone the repository using GIT:
     ```bash
-    git clone https://github.com/yourusername/dvld-project.git
+    git clone https://github.com/KwifiDev/DVLD-Solution.git
     ```
-2. Open the solution in Visual Studio.
-3. Build the project to restore dependencies.
-4. Run the application.
+2. Restore Database to SQL Server From DB_Restore Folder
+3. Open the solution in Visual Studio.
+4. Build the project to restore dependencies.
+5. Run the application.
 
 ## Usage
 1. Launch the application.
