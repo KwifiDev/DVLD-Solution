@@ -16,6 +16,8 @@ namespace DVLD_UI.UserControls
         public UCDriverLicenses()
         {
             InitializeComponent();
+            dgvLocalLicenses.MouseDown += DgvLicenses_MouseDown;
+            dgvInternationalLicenses.MouseDown += DgvLicenses_MouseDown;
         }
 
         public async Task LoadDriverLicensesByDriverID(int driverID)
@@ -82,6 +84,20 @@ namespace DVLD_UI.UserControls
                 FRMInternationalLicenseInfo internationalLicenseInfo = new FRMInternationalLicenseInfo(internationallicenseID);
                 internationalLicenseInfo.ShowDialog();
                 return;
+            }
+        }
+
+        private void DgvLicenses_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                DataGridView dgv = (DataGridView)sender;
+                int rowIndex = dgv.HitTest(e.X, e.Y).RowIndex;
+                if (rowIndex >= 0)
+                {
+                    dgv.ClearSelection();
+                    dgv.Rows[rowIndex].Cells[0].Selected = true;
+                }
             }
         }
     }

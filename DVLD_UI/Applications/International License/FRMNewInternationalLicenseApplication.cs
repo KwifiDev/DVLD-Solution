@@ -39,7 +39,7 @@ namespace DVLD_UI.Froms
                 return;
             }
 
-            ucInterNationalApplicationInfo1.LoadDataAfterFindValidLicense(license.LicenseID, license.PersonID, license.DriverID);
+            ucInterNationalApplicationInfo1.LoadDataAfterFindValidLicense(license.LicenseID, license.DriverInfo.PersonID, license.DriverID);
         }
 
         private void UcFindLicense1_OnInvalidLicense()

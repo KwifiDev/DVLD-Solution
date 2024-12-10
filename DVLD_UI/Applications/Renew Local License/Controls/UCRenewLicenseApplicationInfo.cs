@@ -1,6 +1,7 @@
 ﻿using DVLD_BL;
 using DVLD_UI.Froms;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -22,17 +23,17 @@ namespace DVLD_UI.UserControls
             InitializeComponent();
         }
 
-        public void LoadDefaultData()
+        public async Task LoadDefaultData()
         {
-            LoadDefaultDataToControls();
+            await LoadDefaultDataToControls();
         }
 
-        private void LoadDefaultDataToControls()
+        private async Task LoadDefaultDataToControls()
         {
             lblApplicationDate.Text = DateTime.Now.ToShortDateString();
             lblNewLicenseIssueDate.Text = DateTime.Now.ToShortDateString();
             lblCreatedByUser.Text = ClsGlobal.LoginUser.UserName;
-            lblApplicationFees.Text = ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.RenewDrivingLicense).ToString();
+            lblApplicationFees.Text = (await ClsBL_ApplicationType.FindApplicationFeesByID((int)ClsBL_ApplicationType.EnType.RenewDrivingLicense)).ToString();
         }
 
         public void LoadExpirdLicense(ClsBL_License expirdLicense)
@@ -91,7 +92,7 @@ namespace DVLD_UI.UserControls
 
         private void LLblLicenseHistory_LinkClicked(object sender, EventArgs e)
         {
-            FRMPersonLicenseHistory personLicenseHistory = new FRMPersonLicenseHistory(_expirdLicense.PersonID);
+            FRMPersonLicenseHistory personLicenseHistory = new FRMPersonLicenseHistory(_expirdLicense.DriverInfo.PersonID);
             personLicenseHistory.ShowDialog();
         }
 

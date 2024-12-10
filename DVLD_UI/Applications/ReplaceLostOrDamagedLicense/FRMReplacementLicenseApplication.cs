@@ -14,9 +14,9 @@ namespace DVLD_UI.Froms
             _licenseID = licenseID;
         }
 
-        private void FRMRenewLocalLicenseApplication_Load(object sender, EventArgs e)
+        private async void FRMRenewLocalLicenseApplication_Load(object sender, EventArgs e)
         {
-            ucReplaceLicenseApplicationInfo1.LoadDefaultData();
+            await ucReplaceLicenseApplicationInfo1.LoadDefaultData();
 
             if (_licenseID != -1) ucFindLicense1.SelectLicense(_licenseID);
         }

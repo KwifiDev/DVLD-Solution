@@ -1,5 +1,6 @@
 ﻿using DVLD_BL;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -26,7 +27,7 @@ namespace DVLD_UI.UserControls
                 return;
             }
 
-            if (IsPersonHaveActiveLicense())
+            if (await IsPersonHaveActiveLicense())
             {
                 MessageBox.Show("This Person Have Active Licnese\nCant Issue License", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 EnableControls(false);
@@ -57,9 +58,9 @@ namespace DVLD_UI.UserControls
             return _ldlApplication.IsPassedAllTests();
         }
 
-        private bool IsPersonHaveActiveLicense()
+        private async Task<bool> IsPersonHaveActiveLicense()
         {
-            return _ldlApplication.IsPersonHaveActiveLicense();
+            return await _ldlApplication.IsPersonHaveActiveLicense();
         }
 
         private void EnableControls(bool isEnabled)

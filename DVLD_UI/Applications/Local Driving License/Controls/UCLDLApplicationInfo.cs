@@ -50,7 +50,7 @@ namespace DVLD_UI.UserControls
 
         private async Task FillLocalDrivingLicenseApplicationInfo()
         {
-            _licenseID = _ldlApplication.GetActiveLicenseID();
+            _licenseID = await _ldlApplication.GetActiveLicenseID();
 
             lLblViewLicenseInfo.Enabled = (_licenseID != -1);
 

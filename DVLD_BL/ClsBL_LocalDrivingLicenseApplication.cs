@@ -30,7 +30,6 @@ namespace DVLD_BL
             LocalDrivingLicenseApplicationID = localDrivingLicenseApplicationID;
             ApplicationID = applicationID;
             LicenseClassID = licenseClassID;
-            //LicenseClassInfo = ClsBL_LicenseClass.Find(LicenseClassID);
             enMode = EnMode.Update;
         }
 
@@ -204,12 +203,12 @@ namespace DVLD_BL
 
         public static async Task<int> GetActiveLicenseIDByLDLApplicationID(int localDrivingLicenseApplicationID)
         {
-            return (await Find(localDrivingLicenseApplicationID)).GetActiveLicenseID();
+            return await (await Find(localDrivingLicenseApplicationID)).GetActiveLicenseID();
         }
 
-        public int GetActiveLicenseID()
+        public async Task<int> GetActiveLicenseID()
         {
-            return ClsBL_License.GetActiveLicenseIDByPersonIDAndLicenseClassID(ApplicantPersonID, LicenseClassID);
+            return await ClsBL_License.GetActiveLicenseIDByPersonIDAndLicenseClassID(ApplicantPersonID, LicenseClassID);
         }
 
         public static int FindApplicationIDByID(int localDrivingLicenseApplicationID)
@@ -217,9 +216,9 @@ namespace DVLD_BL
             return ClsDA_LocalDrivingLicenseApplications.GetApplicationIDByID(localDrivingLicenseApplicationID);
         }
 
-        public bool IsLicenseIssued()
+        public async Task<bool> IsLicenseIssued()
         {
-            return (GetActiveLicenseID() != -1);
+            return (await GetActiveLicenseID() != -1);
         }
 
         public bool IsPersonPassTest(ClsBL_TestType.EnType testType)
@@ -316,9 +315,9 @@ namespace DVLD_BL
             return GetPassedTests() == 3;
         }
 
-        public bool IsPersonHaveActiveLicense()
+        public async Task<bool> IsPersonHaveActiveLicense()
         {
-            return GetActiveLicenseID() > 0;
+            return await GetActiveLicenseID() > 0;
         }
 
         public async Task<int> IssueLicenseFirstTime(string notes, int createdByUserID)
@@ -331,13 +330,16 @@ namespace DVLD_BL
                 ApplicationID = ApplicationID,
                 DriverID = driverID,
                 LicenseClassID = LicenseClassID,
+                IssueDate = DateTime.Now,
+                ExpirationDate = DateTime.Now.AddYears((await ClsBL_LicenseClass.Find(LicenseClassID)).DefaultValidityLength),
                 Notes = notes,
                 PaidFees = LicenseClassInfo.ClassFees,
                 IssueReason = ClsBL_License.EnIssueReason.FirstTime,
                 CreatedByUserID = createdByUserID
             };
 
-            if (license.Save())
+
+            if (await license.Save())
             {
                 await SetApplicationComplete();
                 return license.LicenseID;

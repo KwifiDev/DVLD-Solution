@@ -113,7 +113,7 @@ namespace DVLD_UI.Froms
 
         private async void BtnCreateLocalLicenseApplication_Click(object sender, EventArgs e)
         {
-            if (IsPersonHaveActiveLicense())
+            if (await IsPersonHaveActiveLicense())
             {
                 MessageBox.Show("Person Has Already Active Licnese With Same Class License", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -142,10 +142,10 @@ namespace DVLD_UI.Froms
             }
         }
 
-        private bool IsPersonHaveActiveLicense()
+        private async Task<bool> IsPersonHaveActiveLicense()
         {
             int licenseClassID = (int)cbLicenseClasses.SelectedValue;
-            return ClsBL_License.IsPersonHaveActiveLicenseInSpecificClass(ucFindPerson1.PersonID, licenseClassID);
+            return await ClsBL_License.IsPersonHaveActiveLicenseInSpecificClass(ucFindPerson1.PersonID, licenseClassID);
         }
 
         private bool IsPersonHaveActiveLDLApp()

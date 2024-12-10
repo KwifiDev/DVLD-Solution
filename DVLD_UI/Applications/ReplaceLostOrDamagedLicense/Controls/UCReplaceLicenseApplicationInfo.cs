@@ -1,6 +1,7 @@
 ﻿using DVLD_BL;
 using DVLD_UI.Froms;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -22,9 +23,9 @@ namespace DVLD_UI.UserControls
             InitializeComponent();
         }
 
-        public void LoadDefaultData()
+        public async Task LoadDefaultData()
         {
-            LoadDefaultDataToControls();
+            await LoadDefaultDataToControls();
         }
 
         private ClsBL_ApplicationType.EnType GetReplacementFor()
@@ -34,11 +35,11 @@ namespace DVLD_UI.UserControls
                 ClsBL_ApplicationType.EnType.ReplacementLostLicense;
         }
 
-        private void LoadDefaultDataToControls()
+        private async Task LoadDefaultDataToControls()
         {
             lblApplicationDate.Text = DateTime.Now.ToShortDateString();
             lblCreatedByUser.Text = ClsGlobal.LoginUser.UserName;
-            lblApplicationFees.Text = ClsBL_ApplicationType.FindApplicationFeesByID((int)GetReplacementFor()).ToString();
+            lblApplicationFees.Text = (await ClsBL_ApplicationType.FindApplicationFeesByID((int)GetReplacementFor())).ToString();
         }
 
         public void LoadReplacementLicense(ClsBL_License replacementLicense)
@@ -86,7 +87,7 @@ namespace DVLD_UI.UserControls
 
         private void LLblLicenseHistory_LinkClicked(object sender, EventArgs e)
         {
-            var personLicenseHistory = new FRMPersonLicenseHistory(_replacementLicense.PersonID);
+            var personLicenseHistory = new FRMPersonLicenseHistory(_replacementLicense.DriverInfo.PersonID);
             personLicenseHistory.ShowDialog();
         }
 
@@ -107,9 +108,9 @@ namespace DVLD_UI.UserControls
             MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void RbReplacementFor_CheckedChanged(object sender, EventArgs e)
+        private async void RbReplacementFor_CheckedChanged(object sender, EventArgs e)
         {
-            lblApplicationFees.Text = ClsBL_ApplicationType.FindApplicationFeesByID((int)GetReplacementFor()).ToString();
+            lblApplicationFees.Text = (await ClsBL_ApplicationType.FindApplicationFeesByID((int)GetReplacementFor())).ToString();
         }
     }
 }

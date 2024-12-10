@@ -12,22 +12,10 @@ namespace DVLD_BL
 
         public enum EnIssueReason { FirstTime = 1, Renew = 2, ReplacementLost = 3, ReplacementDamaged = 4 }
 
-        private int _licenseClassID;
-
         public int LicenseID { get; set; }
         public int ApplicationID { get; set; }
         public int DriverID { get; set; }
-        public int LicenseClassID
-        {
-            get { return _licenseClassID; }
-
-            set
-            {
-                _licenseClassID = value;
-                if (_licenseClassID == -1) return;
-                SetExpirationDateAsync();
-            }
-        }
+        public int LicenseClassID { get; set; }
         public DateTime IssueDate { get; set; }
         public DateTime ExpirationDate { get; set; }
         public string Notes { get; set; }
@@ -35,10 +23,6 @@ namespace DVLD_BL
         public bool IsActive { get; set; }
         public EnIssueReason IssueReason { get; set; }
         public int CreatedByUserID { get; set; }
-        public int PersonID
-        {
-            get { return FindPersonIDByID(); }
-        }
         public ClsBL_Driver DriverInfo { get; private set; }
         public ClsBL_LicenseClass LicenseClassInfo { get; private set; }
         public ClsBL_DetainedLicense DetainedInfo { get; private set; }
@@ -56,6 +40,7 @@ namespace DVLD_BL
             IsActive = true;
             IssueReason = 0;
             CreatedByUserID = -1;
+
             enMode = EnMode.Add;
         }
 
@@ -75,16 +60,7 @@ namespace DVLD_BL
             IssueReason = issueReason;
             CreatedByUserID = createdByUserID;
 
-            //DriverInfo = ClsBL_Driver.Find(DriverID);
-            //LicenseClassInfo = ClsBL_LicenseClass.Find(LicenseClassID);
-            //DetainedInfo = ClsBL_DetainedLicense.FindByLicenseID(LicenseID);
-
             enMode = EnMode.Update;
-        }
-        private async void SetExpirationDateAsync()
-        {
-            ExpirationDate = IssueDate.AddYears((await ClsBL_LicenseClass.Find(_licenseClassID)).DefaultValidityLength);
-
         }
 
         public static async Task<ClsBL_License> CreateAsync(int licenseID, int applicationID, int driverID, int licenseClassID, DateTime issueDate,
@@ -105,38 +81,33 @@ namespace DVLD_BL
 
         public static async Task<ClsBL_License> Find(int licenseID)
         {
-            int applicationID = -1, driverID = -1, licenseClassID = -1, createdByUserID = -1;
-            float paidFees = 0;
-            byte issueReason = 0;
-            bool isActive = false;
-            string notes = string.Empty;
-            DateTime issueDate = DateTime.Now, expirationDate = DateTime.Now;
+            ClsDA_Licenses.Data data = await ClsDA_Licenses.GetLicenseByID(licenseID);
 
-            if (ClsDA_Licenses.GetLicenseByID(licenseID, ref applicationID, ref driverID, ref licenseClassID,
-                ref issueDate, ref expirationDate, ref notes, ref paidFees, ref isActive, ref issueReason, ref createdByUserID))
+            if (data != null && data.IsFound)
             {
-                return await CreateAsync(licenseID, applicationID, driverID, licenseClassID, issueDate, expirationDate,
-                                        notes, paidFees, isActive, (EnIssueReason)issueReason, createdByUserID).ConfigureAwait(false);
+                return await CreateAsync(licenseID, data.ApplicationID, data.DriverID, data.LicenseClassID, data.IssueDate,
+                    data.ExpirationDate, data.Notes, data.PaidFees, data.IsActive, (EnIssueReason)data.IssueReason,
+                    data.CreatedByUserID).ConfigureAwait(false);
             }
             else return null;
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_Licenses.GetAllLicenses();
+            return await ClsDA_Licenses.GetAllLicenses();
         }
 
-        public static bool IsExist(int licenseID)
+        public static async Task<bool> IsExist(int licenseID)
         {
-            return ClsDA_Licenses.IsLicenseExist(licenseID);
+            return await ClsDA_Licenses.IsLicenseExist(licenseID);
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
                 case EnMode.Add:
-                    if (_Add())
+                    if (await _Add())
                     {
                         enMode = EnMode.Update;
                         return true;
@@ -144,21 +115,21 @@ namespace DVLD_BL
                     else return false;
 
                 case EnMode.Update:
-                    return _Update();
+                    return await _Update();
 
             }
 
             return false;
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_Licenses.UpdateLicense(LicenseID, IsActive);
+            return await ClsDA_Licenses.UpdateLicense(LicenseID, IsActive);
         }
 
-        private bool _Add()
+        private async Task<bool> _Add()
         {
-            LicenseID = ClsDA_Licenses.AddNewLicense(ApplicationID, DriverID, LicenseClassID, IssueDate, ExpirationDate,
+            LicenseID = await ClsDA_Licenses.AddNewLicense(ApplicationID, DriverID, LicenseClassID, IssueDate, ExpirationDate,
                                                      Notes, PaidFees, IsActive, (byte)IssueReason, CreatedByUserID);
             return (LicenseID > 0);
         }
@@ -200,29 +171,24 @@ namespace DVLD_BL
             return ExpirationDate < DateTime.Now;
         }
 
-        public static bool DeactivateLicenseByID(int licenseID)
+        public static async Task<bool> DeactivateLicenseByID(int licenseID)
         {
-            return ClsDA_Licenses.DeactivateLicenseByID(licenseID);
+            return await ClsDA_Licenses.DeactivateLicenseByID(licenseID);
         }
 
-        private bool DeactivateCurrentLicense()
+        private async Task<bool> DeactivateCurrentLicense()
         {
-            return DeactivateLicenseByID(LicenseID);
+            return await DeactivateLicenseByID(LicenseID);
         }
 
-        public static int FindPersonIDByID(int licenseID)
+        public static async Task<int> FindPersonIDByID(int licenseID)
         {
-            return ClsDA_Licenses.GetPersonIDByID(licenseID);
+            return await ClsDA_Licenses.GetPersonIDByID(licenseID);
         }
 
-        private int FindPersonIDByID()
+        public static async Task<int> GetActiveLicenseIDByPersonIDAndLicenseClassID(int applicantPersonID, int licenseClassID)
         {
-            return FindPersonIDByID(LicenseID);
-        }
-
-        public static int GetActiveLicenseIDByPersonIDAndLicenseClassID(int applicantPersonID, int licenseClassID)
-        {
-            return ClsDA_Licenses.GetActiveLicenseIDByPersonIDAndLicenseClassID(applicantPersonID, licenseClassID);
+            return await ClsDA_Licenses.GetActiveLicenseIDByPersonIDAndLicenseClassID(applicantPersonID, licenseClassID);
         }
 
         public async Task<ClsBL_License> Renew(string notes, int createdByUserID)
@@ -230,7 +196,7 @@ namespace DVLD_BL
             // First We Create Renew Application To Pay Fees Of Renew License Application
             ClsBL_Application renewApp = new ClsBL_Application
             {
-                ApplicantPersonID = PersonID,
+                ApplicantPersonID = DriverInfo.PersonID,
                 ApplicationStatus = ClsBL_Application.EnStatus.Completed,
                 ApplicationTypeID = (int)ClsBL_ApplicationType.EnType.RenewDrivingLicense,
                 CreatedByUserID = createdByUserID
@@ -247,18 +213,20 @@ namespace DVLD_BL
                 ApplicationID = renewApp.ApplicationID,
                 DriverID = DriverID,
                 LicenseClassID = LicenseClassID,
+                IssueDate = DateTime.Now,
+                ExpirationDate = DateTime.Now.AddYears((await ClsBL_LicenseClass.Find(LicenseClassID)).DefaultValidityLength),
                 Notes = notes,
                 PaidFees = PaidFees,
                 CreatedByUserID = createdByUserID,
                 IssueReason = EnIssueReason.Renew
             };
 
-            if (!newLicense.Save())
+            if (!await newLicense.Save())
             {
                 return null;
             }
 
-            DeactivateCurrentLicense();
+            await DeactivateCurrentLicense();
 
             return newLicense;
         }
@@ -268,7 +236,7 @@ namespace DVLD_BL
             // First We Create Replacement Application To Pay Fees Of Replacement License
             ClsBL_Application replaceApp = new ClsBL_Application
             {
-                ApplicantPersonID = PersonID,
+                ApplicantPersonID = DriverInfo.PersonID,
                 ApplicationStatus = ClsBL_Application.EnStatus.Completed,
                 ApplicationTypeID = (int)replacementFor,
                 CreatedByUserID = createdByUserID
@@ -285,19 +253,20 @@ namespace DVLD_BL
                 ApplicationID = replaceApp.ApplicationID,
                 DriverID = DriverID,
                 LicenseClassID = LicenseClassID,
-                ExpirationDate = ExpirationDate,
+                IssueDate = DateTime.Now,
+                ExpirationDate = ExpirationDate, // Old expiration Date because it's a replacement.
                 Notes = Notes,
                 PaidFees = 0, // No fees for the license because it's a replacement.
                 CreatedByUserID = createdByUserID,
                 IssueReason = GetIssueReason(replacementFor)
             };
 
-            if (!newLicense.Save())
+            if (!await newLicense.Save())
             {
                 return null;
             }
 
-            DeactivateCurrentLicense();
+            await DeactivateCurrentLicense();
 
             return newLicense;
         }
@@ -323,7 +292,7 @@ namespace DVLD_BL
             // First We Create Release Application To Pay Fees Of Released License
             ClsBL_Application releaseApp = new ClsBL_Application
             {
-                ApplicantPersonID = PersonID,
+                ApplicantPersonID = DriverInfo.PersonID,
                 ApplicationStatus = ClsBL_Application.EnStatus.Completed,
                 ApplicationTypeID = (int)ClsBL_ApplicationType.EnType.ReleaseDetainedLicsense,
                 CreatedByUserID = createdByUserID
@@ -360,9 +329,9 @@ namespace DVLD_BL
             return LicenseClassID == (int)ClsBL_LicenseClass.EnType.Ordinary;
         }
 
-        public static bool IsPersonHaveActiveLicenseInSpecificClass(int personID, int licenseClassID)
+        public static async Task<bool> IsPersonHaveActiveLicenseInSpecificClass(int personID, int licenseClassID)
         {
-            return ClsDA_Licenses.IsPersonHaveActiveLicenseInSpecificClass(personID, licenseClassID);
+            return await ClsDA_Licenses.IsPersonHaveActiveLicenseInSpecificClass(personID, licenseClassID);
         }
 
         public static async Task<DataTable> FindLocalLicensesByID(int driverID)

@@ -79,7 +79,7 @@ namespace DVLD_UI.UserControls
 
         private void LLblLicenseHistory_LinkClicked(object sender, EventArgs e)
         {
-            FRMPersonLicenseHistory personLicenseHistory = new FRMPersonLicenseHistory(_license.PersonID);
+            FRMPersonLicenseHistory personLicenseHistory = new FRMPersonLicenseHistory(_license.DriverInfo.PersonID);
             personLicenseHistory.ShowDialog();
         }
 

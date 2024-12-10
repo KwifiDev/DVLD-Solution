@@ -57,15 +57,15 @@ namespace DVLD_UI
             }
         }
 
-        private int GetPersonID()
+        private async Task<int> GetPersonID()
         {
             int licenseID = (int)dgvDetainedLicenses.CurrentRow.Cells["LicenseID"].Value;
-            return ClsBL_License.FindPersonIDByID(licenseID);
+            return await ClsBL_License.FindPersonIDByID(licenseID);
         }
 
         private async void ShowPersonDetails()
         {
-            int personID = GetPersonID();
+            int personID = await GetPersonID();
 
             FRMPersonDetails personDetails = new FRMPersonDetails(personID);
             personDetails.ShowDialog();
@@ -92,9 +92,9 @@ namespace DVLD_UI
             await LoadDetainedLicensesDataToGridView();
         }
 
-        private void BtnShowPersonLicenseHistory_Click(object sender, EventArgs e)
+        private async void BtnShowPersonLicenseHistory_Click(object sender, EventArgs e)
         {
-            int personID = GetPersonID();
+            int personID = await GetPersonID();
 
             FRMPersonLicenseHistory personLicenseHistory = new FRMPersonLicenseHistory(personID);
             personLicenseHistory.ShowDialog();

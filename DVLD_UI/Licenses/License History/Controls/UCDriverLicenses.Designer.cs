@@ -99,7 +99,7 @@
             this.tabControl.Pages.AddRange(new ComponentFactory.Krypton.Navigator.KryptonPage[] {
             this.tabLocalLicense,
             this.tabInternationalLicense});
-            this.tabControl.SelectedIndex = 0;
+            this.tabControl.SelectedIndex = 1;
             this.tabControl.Size = new System.Drawing.Size(779, 247);
             this.tabControl.StateCommon.Panel.Color1 = System.Drawing.Color.White;
             this.tabControl.StateCommon.Tab.Back.Color1 = System.Drawing.Color.Red;
@@ -182,6 +182,7 @@
             this.dgvLocalLicenses.StateSelected.DataCell.Back.Color1 = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.dgvLocalLicenses.StateSelected.DataCell.Back.Color2 = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
             this.dgvLocalLicenses.TabIndex = 4;
+            this.dgvLocalLicenses.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DgvLicenses_MouseDown);
             // 
             // LicenseID
             // 
@@ -328,6 +329,7 @@
             this.dgvInternationalLicenses.StateSelected.DataCell.Back.Color1 = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.dgvInternationalLicenses.StateSelected.DataCell.Back.Color2 = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
             this.dgvInternationalLicenses.TabIndex = 5;
+            this.dgvInternationalLicenses.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DgvLicenses_MouseDown);
             // 
             // InternationalLicenseID
             // 

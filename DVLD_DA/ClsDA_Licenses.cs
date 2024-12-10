@@ -4,12 +4,30 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
 
 namespace DVLD_DA
 {
     public class ClsDA_Licenses
     {
-        public static int AddNewLicense(int applicationID, int driverID, int licenseClassID, DateTime issueDate,
+        public class Data
+        {
+            public bool IsFound { get; set; }
+            public int LicenseID { get; set; }
+            public int ApplicationID { get; set; }
+            public int DriverID { get; set; }
+            public int LicenseClassID { get; set; }
+            public DateTime IssueDate { get; set; }
+            public DateTime ExpirationDate { get; set; }
+            public string Notes { get; set; }
+            public float PaidFees { get; set; }
+            public bool IsActive { get; set; }
+            public byte IssueReason { get; set; }
+            public int CreatedByUserID { get; set; }
+        }
+            
+        
+        public static async Task<int> AddNewLicense(int applicationID, int driverID, int licenseClassID, DateTime issueDate,
                                         DateTime expirationDate, string notes, float paidFees,
                                         bool isActive, byte issueReason, int createdByUserID)
         {
@@ -36,8 +54,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         licenseID = result;
@@ -53,7 +71,7 @@ namespace DVLD_DA
             return licenseID;
         }
 
-        public static bool UpdateLicense(int licenseID, bool isActive)
+        public static async Task<bool> UpdateLicense(int licenseID, bool isActive)
         {
             bool isUpdated = false;
 
@@ -67,8 +85,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -81,11 +99,9 @@ namespace DVLD_DA
             }
         }
 
-        public static bool GetLicenseByID(int licenseID, ref int applicationID, ref int driverID, ref int licenseClassID,
-                                        ref DateTime issueDate, ref DateTime expirationDate, ref string notes,
-                                        ref float paidFees, ref bool isActive, ref byte issueReason, ref int createdByUserID)
+        public static async Task<Data> GetLicenseByID(int licenseID)
         {
-            bool isFound = false;
+            Data license = null;
 
             string query = @"SELECT * FROM Licenses WHERE LicenseID = @LicenseID";
 
@@ -97,23 +113,26 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            applicationID = (int)reader["ApplicationID"];
-                            driverID = (int)reader["DriverID"];
-                            licenseClassID = (int)reader["LicenseClass"];
-                            issueDate = (DateTime)reader["IssueDate"];
-                            expirationDate = (DateTime)reader["ExpirationDate"];
-                            notes = reader["Notes"] as string;
-                            paidFees = Convert.ToSingle(reader["PaidFees"]);
-                            isActive = (bool)reader["IsActive"];
-                            issueReason = (byte)reader["IssueReason"];
-                            createdByUserID = (int)reader["CreatedByUserID"];
+                            license = new Data
+                            {
+                                IsFound = true,
+                                ApplicationID = (int)reader["ApplicationID"],
+                                DriverID = (int)reader["DriverID"],
+                                LicenseClassID = (int)reader["LicenseClass"],
+                                IssueDate = (DateTime)reader["IssueDate"],
+                                ExpirationDate = (DateTime)reader["ExpirationDate"],
+                                Notes = reader["Notes"] as string,
+                                PaidFees = Convert.ToSingle(reader["PaidFees"]),
+                                IsActive = (bool)reader["IsActive"],
+                                IssueReason = (byte)reader["IssueReason"],
+                                CreatedByUserID = (int)reader["CreatedByUserID"]
+                            };
                         }
                     }
 
@@ -124,11 +143,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return license;
             }
         }
 
-        public static DataTable GetAllLicenses()
+        public static async Task<DataTable> GetAllLicenses()
         {
             DataTable dt_Licenses = new DataTable();
 
@@ -139,9 +158,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_Licenses.Load(reader);
                     }
@@ -157,7 +176,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsLicenseExist(int licenseID)
+        public static async Task<bool> IsLicenseExist(int licenseID)
         {
             bool isExist = false;
 
@@ -171,9 +190,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
@@ -186,7 +205,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool DeactivateLicenseByID(int licenseID)
+        public static async Task<bool> DeactivateLicenseByID(int licenseID)
         {
             bool isUpdated = false;
 
@@ -199,8 +218,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -213,7 +232,7 @@ namespace DVLD_DA
             }
         }
 
-        public static int GetPersonIDByID(int licenseID)
+        public static async Task<int> GetPersonIDByID(int licenseID)
         {
             int personID = -1;
 
@@ -228,8 +247,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         personID = result;
@@ -245,7 +264,7 @@ namespace DVLD_DA
             return personID;
         }
 
-        public static int GetActiveLicenseIDByPersonIDAndLicenseClassID(int applicantPersonID, int licenseClassID)
+        public static async Task<int> GetActiveLicenseIDByPersonIDAndLicenseClassID(int applicantPersonID, int licenseClassID)
         {
             int licenseID = -1;
 
@@ -263,8 +282,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         licenseID = result;
@@ -280,7 +299,7 @@ namespace DVLD_DA
             return licenseID;
         }
 
-        public static bool IsPersonHaveActiveLicenseInSpecificClass(int personID, int licenseClassID)
+        public static async Task<bool> IsPersonHaveActiveLicenseInSpecificClass(int personID, int licenseClassID)
         {
             bool isExist = false;
 
@@ -300,9 +319,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
