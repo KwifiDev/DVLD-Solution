@@ -74,36 +74,30 @@ namespace DVLD_BL
 
         public new static async Task<ClsBL_InternationalLicense> Find(int internationalLicenseID)
         {
-            int applicationID = -1, driverID = -1, issuedUsingLocalLicenseID = -1, createdByUserID = -1;
-            bool isActive = false;
-            DateTime issueDate = DateTime.Now, expirationDate = DateTime.Now;
+            ClsDA_InternationalLicenses.Data data = await ClsDA_InternationalLicenses.GetInternationalLicenseByID(internationalLicenseID);
 
-            bool isFound = ClsDA_InternationalLicenses.GetInternationalLicenseByID
-                (internationalLicenseID, ref applicationID, ref driverID, ref issuedUsingLocalLicenseID,
-                ref issueDate, ref expirationDate, ref isActive, ref createdByUserID);
-
-            if (isFound)
+            if (data != null && data.IsFound)
             {
                 //Now we find the base application
-                ClsBL_Application app = await ClsBL_Application.Find(applicationID);
+                ClsBL_Application app = await ClsBL_Application.Find(data.ApplicationID);
 
                 return await CreateAsync(app.ApplicationID, app.ApplicantPersonID, app.ApplicationDate,
                     app.ApplicationStatus, app.LastStatusDate, app.PaidFees, app.CreatedByUserID,
-                    internationalLicenseID, driverID, issuedUsingLocalLicenseID,
-                    issueDate, expirationDate, isActive).ConfigureAwait(false);
+                    internationalLicenseID, data.DriverID, data.IssuedUsingLocalLicenseID,
+                    data.IssueDate, data.ExpirationDate, data.IsActive).ConfigureAwait(false);
 
             }
             else return null;
         }
 
-        public new static DataTable Load()
+        public new static async Task<DataTable> Load()
         {
-            return ClsDA_InternationalLicenses.GetAllInternationalLicenses();
+            return await ClsDA_InternationalLicenses.GetAllInternationalLicenses();
         }
 
-        public new static bool IsExist(int internationalLicenseID)
+        public new static async Task<bool> IsExist(int internationalLicenseID)
         {
-            return ClsDA_InternationalLicenses.IsInternationalLicenseExist(internationalLicenseID);
+            return await ClsDA_InternationalLicenses.IsInternationalLicenseExist(internationalLicenseID);
         }
 
         public new async Task<bool> Save()
@@ -115,7 +109,7 @@ namespace DVLD_BL
             switch (enMode)
             {
                 case EnMode.Add:
-                    if (_Add())
+                    if (await _Add())
                     {
                         enMode = EnMode.Update;
                         return true;
@@ -123,21 +117,21 @@ namespace DVLD_BL
                     else return false;
 
                 case EnMode.Update:
-                    return _Update();
+                    return await _Update();
 
             }
 
             return false;
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_InternationalLicenses.UpdateInternationalLicense(InternationalLicenseID, IsActive);
+            return await ClsDA_InternationalLicenses.UpdateInternationalLicense(InternationalLicenseID, IsActive);
         }
 
-        private bool _Add()
+        private async Task<bool> _Add()
         {
-            InternationalLicenseID = ClsDA_InternationalLicenses.AddNewInternationalLicense
+            InternationalLicenseID = await ClsDA_InternationalLicenses.AddNewInternationalLicense
                 (ApplicationID, DriverID, IssuedUsingLocalLicenseID, IssueDate, ExpirationDate, IsActive, CreatedByUserID);
 
             return (InternationalLicenseID > 0);

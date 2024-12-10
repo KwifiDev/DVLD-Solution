@@ -32,16 +32,16 @@ namespace DVLD_UI.Froms
 
         private async void FRMNewLocalDrivingLicenseApplication_Load(object sender, EventArgs e)
         {
-            LoadLicenseClassesToComboBox();
+            await LoadLicenseClassesToComboBox();
             await LoadApplicationData();
         }
 
-        private void LoadLicenseClassesToComboBox()
+        private async Task LoadLicenseClassesToComboBox()
         {
             // Put Mode To New To Disable CbLicenseClasses_SelectedIndexChanged While Adding Data
             //enMode = EnMode.Add;
 
-            cbLicenseClasses.DataSource = ClsBL_LicenseClass.LoadShort();
+            cbLicenseClasses.DataSource = await ClsBL_LicenseClass.LoadShort();
             cbLicenseClasses.ValueMember = "LicenseClassID";
             cbLicenseClasses.DisplayMember = "ClassName";
             cbLicenseClasses.SelectedValue = 3;

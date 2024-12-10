@@ -4,12 +4,24 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
 
 namespace DVLD_DA
 {
     public class ClsDA_InternationalLicenses
     {
-        public static int AddNewInternationalLicense(int applicationID, int driverID, int issuedUsingLocalLicenseID, DateTime issueDate,
+        public class Data
+        {
+            public bool IsFound { get; set; }
+            public int ApplicationID { get; set; }
+            public int DriverID { get; set; }
+            public int IssuedUsingLocalLicenseID { get; set; }
+            public DateTime IssueDate { get; set; }
+            public DateTime ExpirationDate { get; set; }
+            public bool IsActive { get; set; }
+            public int CreatedByUserID { get; set; }
+        }
+        public static async Task<int> AddNewInternationalLicense(int applicationID, int driverID, int issuedUsingLocalLicenseID, DateTime issueDate,
                                         DateTime expirationDate, bool isActive, int createdByUserID)
         {
             int licenseID = -1;
@@ -37,8 +49,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         licenseID = result;
@@ -54,7 +66,7 @@ namespace DVLD_DA
             return licenseID;
         }
 
-        public static bool UpdateInternationalLicense(int internationalLicenseID, bool isActive)
+        public static async Task<bool> UpdateInternationalLicense(int internationalLicenseID, bool isActive)
         {
             bool isUpdated = false;
 
@@ -69,8 +81,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -83,10 +95,9 @@ namespace DVLD_DA
             }
         }
 
-        public static bool GetInternationalLicenseByID(int internationalLicenseID, ref int applicationID, ref int driverID, ref int issuedUsingLocalLicenseID,
-                                        ref DateTime issueDate, ref DateTime expirationDate, ref bool isActive, ref int createdByUserID)
+        public static async Task<Data> GetInternationalLicenseByID(int internationalLicenseID)
         {
-            bool isFound = false;
+            Data internationalLicense = null;
 
             string query = @"SELECT * FROM InternationalLicenses WHERE InternationalLicenseID = @InternationalLicenseID";
 
@@ -98,20 +109,23 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            applicationID = (int)reader["ApplicationID"];
-                            driverID = (int)reader["DriverID"];
-                            issuedUsingLocalLicenseID = (int)reader["IssuedUsingLocalLicenseID"];
-                            issueDate = (DateTime)reader["IssueDate"];
-                            expirationDate = (DateTime)reader["ExpirationDate"];
-                            isActive = (bool)reader["IsActive"];
-                            createdByUserID = (int)reader["CreatedByUserID"];
+                            internationalLicense = new Data
+                            {
+                                IsFound = true,
+                                ApplicationID = (int)reader["ApplicationID"],
+                                DriverID = (int)reader["DriverID"],
+                                IssuedUsingLocalLicenseID = (int)reader["IssuedUsingLocalLicenseID"],
+                                IssueDate = (DateTime)reader["IssueDate"],
+                                ExpirationDate = (DateTime)reader["ExpirationDate"],
+                                IsActive = (bool)reader["IsActive"],
+                                CreatedByUserID = (int)reader["CreatedByUserID"]
+                            };
                         }
                     }
 
@@ -122,11 +136,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return internationalLicense;
             }
         }
 
-        public static DataTable GetAllInternationalLicenses()
+        public static async Task<DataTable> GetAllInternationalLicenses()
         {
             DataTable dt_InternationalLicenses = new DataTable();
 
@@ -137,9 +151,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_InternationalLicenses.Load(reader);
                     }
@@ -155,7 +169,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsInternationalLicenseExist(int internationalLicenseID)
+        public static async Task<bool> IsInternationalLicenseExist(int internationalLicenseID)
         {
             bool isExist = false;
 
@@ -170,9 +184,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
