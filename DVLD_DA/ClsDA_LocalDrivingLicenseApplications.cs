@@ -4,12 +4,21 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
 
 namespace DVLD_DA
 {
     public class ClsDA_LocalDrivingLicenseApplications
     {
-        public static int AddNewLocalDrivingLicenseApplication(int applicationID, int licenseClassID)
+        public class Data
+        {
+            public bool IsFound { get; set; }
+            public int LocalDrivingLicenseApplicationID { get; set; }
+            public int ApplicationID { get; set; }
+            public int LicenseClassID { get; set; }
+        }
+
+        public static async Task<int> AddNewLocalDrivingLicenseApplication(int applicationID, int licenseClassID)
         {
             int localDrivingLicenseApplicationID = -1;
 
@@ -26,8 +35,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         localDrivingLicenseApplicationID = result;
@@ -43,7 +52,7 @@ namespace DVLD_DA
             return localDrivingLicenseApplicationID;
         }
 
-        public static bool UpdateLocalDrivingLicenseApplication(int localDrivingLicenseApplicationID, int licenseClassID)
+        public static async Task<bool> UpdateLocalDrivingLicenseApplication(int localDrivingLicenseApplicationID, int licenseClassID)
         {
             bool isUpdated = false;
 
@@ -59,8 +68,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -73,7 +82,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool DeleteLocalDrivingLicenseApplication(int localDrivingLicenseApplicationID)
+        public static async Task<bool> DeleteLocalDrivingLicenseApplication(int localDrivingLicenseApplicationID)
         {
             bool isDeleted = false;
 
@@ -87,9 +96,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    int affectedRows = command.ExecuteNonQuery();
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 
                     isDeleted = (affectedRows > 0);
 
@@ -104,7 +113,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool DeleteFullApplication(int localDrivingLicenseApplicationID, int applicationID)
+        public static async Task<bool> DeleteFullApplication(int localDrivingLicenseApplicationID, int applicationID)
         {
             bool isDeleted = false;
 
@@ -121,9 +130,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    int affectedRows = command.ExecuteNonQuery();
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
 
                     isDeleted = (affectedRows > 0);
 
@@ -138,9 +147,9 @@ namespace DVLD_DA
             }
         }
 
-        public static bool GetLocalDrivingLicenseApplicationByID(int localDrivingLicenseApplicationID, ref int applicationID, ref int licenseClassID)
+        public static async Task<Data> GetLocalDrivingLicenseApplicationByID(int localDrivingLicenseApplicationID)
         {
-            bool isFound = false;
+            Data ldlApplication = null;
 
             string query = @"SELECT * FROM LocalDrivingLicenseApplications 
                             WHERE LocalDrivingLicenseApplicationID = @LocalDrivingLicenseApplicationID";
@@ -153,15 +162,19 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            applicationID = (int)reader["ApplicationID"];
-                            licenseClassID = (int)reader["LicenseClassID"];
+                            ldlApplication = new Data
+                            {
+                                IsFound = true,
+                                LocalDrivingLicenseApplicationID = localDrivingLicenseApplicationID,
+                                ApplicationID = (int)reader["ApplicationID"],
+                                LicenseClassID = (int)reader["LicenseClassID"]
+                            };
                         }
                     }
 
@@ -172,11 +185,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return ldlApplication;
             }
         }
 
-        public static DataTable GetAllLocalDrivingLicenseApplications()
+        public static async Task<DataTable> GetAllLocalDrivingLicenseApplications()
         {
             DataTable dt_LocalDrivingLicenseApplications = new DataTable();
 
@@ -187,9 +200,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_LocalDrivingLicenseApplications.Load(reader);
                     }
@@ -205,7 +218,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllLocalDrivingLicenseApplications_View()
+        public static async Task<DataTable> GetAllLocalDrivingLicenseApplications_View()
         {
             DataTable dt_LocalDrivingLicenseApplications_View = new DataTable();
 
@@ -216,9 +229,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_LocalDrivingLicenseApplications_View.Load(reader);
                     }
@@ -234,7 +247,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsLocalDrivingLicenseApplicationExist(int localDrivingLicenseApplicationID)
+        public static async Task<bool> IsLocalDrivingLicenseApplicationExist(int localDrivingLicenseApplicationID)
         {
             bool isExist = false;
 
@@ -249,9 +262,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
@@ -264,7 +277,7 @@ namespace DVLD_DA
             }
         }
 
-        public static int IsPersonHasLocalDrivingLicenseApplicationWithSameClass(int applicantPersonID, int licenseClassID)
+        public static async Task<int> IsPersonHasLocalDrivingLicenseApplicationWithSameClass(int applicantPersonID, int licenseClassID)
         {
             int applicationID = -1;
 
@@ -285,9 +298,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    applicationID = Convert.ToInt32(command.ExecuteScalar());
+                    applicationID = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false));
 
                 }
                 catch (Exception ex)
@@ -300,7 +313,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool CancelLDLApplicationByID(int localDrivingLicenseApplicationID)
+        public static async Task<bool> CancelLDLApplicationByID(int localDrivingLicenseApplicationID)
         {
             bool IsCanceled = false;
 
@@ -316,8 +329,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     IsCanceled = (affectedRows > 0);
 
                 }
@@ -331,7 +344,7 @@ namespace DVLD_DA
             }
         }
 
-        public static int GetPassedTestsCount(int localDrivingLicenseApplicationID)
+        public static async Task<int> GetPassedTestsCount(int localDrivingLicenseApplicationID)
         {
             int passedTests = -1;
 
@@ -350,9 +363,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    object count = command.ExecuteScalar();
+                    object count = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (count != null && int.TryParse(count.ToString(), out int result))
                     {
                         passedTests = result;
@@ -369,9 +382,9 @@ namespace DVLD_DA
             }
         }
 
-        public static bool GetLocalDrivingLicenseApplicationByLDLApplicationID(ref int localDrivingLicenseApplicationID, int applicationID, ref int licenseClassID)
+        public static async Task<Data> GetLocalDrivingLicenseApplicationByLDLApplicationID(int applicationID)
         {
-            bool isFound = false;
+            Data ldlAppliction = null;
 
             string query = @"SELECT * FROM LocalDrivingLicenseApplications 
                             WHERE ApplicationID = @ApplicationID";
@@ -384,15 +397,19 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            localDrivingLicenseApplicationID = (int)reader["LocalDrivingLicenseApplicationID"];
-                            licenseClassID = (int)reader["LicenseClassID"];
+                            ldlAppliction = new Data
+                            {
+                                IsFound = true,
+                                LocalDrivingLicenseApplicationID = (int)reader["LocalDrivingLicenseApplicationID"],
+                                ApplicationID = applicationID,
+                                LicenseClassID = (int)reader["LicenseClassID"]
+                            };
                         }
                     }
 
@@ -403,11 +420,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return ldlAppliction;
             }
         }
 
-        public static int GetApplicationIDByID(int localDrivingLicenseApplicationID)
+        public static async Task<int> GetApplicationIDByID(int localDrivingLicenseApplicationID)
         {
             int applicationID = -1;
 
@@ -422,9 +439,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    object count = command.ExecuteScalar();
+                    object count = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (count != null && int.TryParse(count.ToString(), out int result))
                     {
                         applicationID = result;
@@ -441,7 +458,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsPersonPassTest(int localDrivingLicenseApplicationID, int testTypeID)
+        public static async Task<bool> IsPersonPassTest(int localDrivingLicenseApplicationID, int testTypeID)
         {
             bool isPassTest = false;
 
@@ -460,9 +477,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isPassTest = (Convert.ToInt32(command.ExecuteScalar()) > 0);
+                    isPassTest = (Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0);
 
                 }
                 catch (Exception ex)
@@ -475,7 +492,7 @@ namespace DVLD_DA
             }
         }
 
-        public static string GetFullNameByLDLApplicationID(int localDrivingLicenseApplicationID)
+        public static async Task<string> GetFullNameByLDLApplicationID(int localDrivingLicenseApplicationID)
         {
             string fullName = string.Empty;
 
@@ -494,9 +511,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
@@ -515,7 +532,7 @@ namespace DVLD_DA
             }
         }
 
-        public static int GetPersonIDByLDLApplicationID(int localDrivingLicenseApplicationID)
+        public static async Task<int> GetPersonIDByLDLApplicationID(int localDrivingLicenseApplicationID)
         {
             int applicantPersonID = -1;
 
@@ -531,9 +548,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {

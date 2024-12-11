@@ -14,13 +14,13 @@ namespace DVLD_UI.UserControls
             InitializeComponent();
         }
 
-        public async void LoadData(int ldlApplicationID)
+        public async Task LoadData(int ldlApplicationID)
         {
             if (!await ucldlApplicationInfo1.LoadDataByLDLApplicationID(ldlApplicationID)) return;
 
             _ldlApplication = ucldlApplicationInfo1.LDLApplication;
 
-            if (!IsPersonPassedAllTests())
+            if (!await IsPersonPassedAllTests())
             {
                 MessageBox.Show("This Person Not Passed All Tests\nCant Issue License", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 EnableControls(false);
@@ -53,9 +53,9 @@ namespace DVLD_UI.UserControls
 
         }
 
-        private bool IsPersonPassedAllTests()
+        private async Task<bool> IsPersonPassedAllTests()
         {
-            return _ldlApplication.IsPassedAllTests();
+            return await _ldlApplication.IsPassedAllTests();
         }
 
         private async Task<bool> IsPersonHaveActiveLicense()

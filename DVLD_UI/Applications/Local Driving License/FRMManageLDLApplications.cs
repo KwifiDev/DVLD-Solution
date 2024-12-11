@@ -6,6 +6,7 @@ using System.Data;
 using System.Windows.Forms;
 using static DVLD_UI.ClsGlobal;
 using static DVLD_BL.ClsBL_User;
+using System.Threading.Tasks;
 
 namespace DVLD_UI.Froms
 {
@@ -19,9 +20,9 @@ namespace DVLD_UI.Froms
             dgvApplication.MouseDown += DgvApplication_MouseDown;
         }
 
-        private void FRMManageApplications_Load(object sender, EventArgs e)
+        private async void FRMManageApplications_Load(object sender, EventArgs e)
         {
-            LoadApplicationDataToDataTable();
+            await LoadApplicationDataToDataTable();
             InitializePermissions();
         }
 
@@ -31,9 +32,9 @@ namespace DVLD_UI.Froms
             btnShowPersonLicenseHistory.Enabled = IsUserCanAccessTo[EnPermissions.PersonLicenseHistory];
         }
 
-        private void LoadApplicationDataToDataTable()
+        private async Task LoadApplicationDataToDataTable()
         {
-            _fullLDLApplicationTB = ClsBL_LocalDrivingLicenseApplication.LoadView();
+            _fullLDLApplicationTB = await ClsBL_LocalDrivingLicenseApplication.LoadView();
 
             dgvApplication.DataSource = _fullLDLApplicationTB;
             ucFilter1.LinkFilterWithDataTable(ref _fullLDLApplicationTB);
@@ -53,12 +54,12 @@ namespace DVLD_UI.Froms
             }
         }
 
-        private void BtnRefresh_Click(object sender, EventArgs e)
+        private async void BtnRefresh_Click(object sender, EventArgs e)
         {
-            LoadApplicationDataToDataTable();
+            await LoadApplicationDataToDataTable();
         }
 
-        private void AddEditLDLApp(bool isEdit)
+        private async Task AddEditLDLApp(bool isEdit)
         {
             if (isEdit)
             {
@@ -70,7 +71,7 @@ namespace DVLD_UI.Froms
                 AddLDLApp();
             }
 
-            LoadApplicationDataToDataTable();
+            await LoadApplicationDataToDataTable();
         }
 
         private void AddLDLApp()
@@ -86,21 +87,21 @@ namespace DVLD_UI.Froms
             newLocalDrvingLicense.ShowDialog();
         }
 
-        private void BtnAddApplication_Click(object sender, EventArgs e)
+        private async void BtnAddApplication_Click(object sender, EventArgs e)
         {
-            AddEditLDLApp(isEdit: false);
+            await AddEditLDLApp(isEdit: false);
         }
 
-        private void BtnEditApplication_Click(object sender, EventArgs e)
+        private async void BtnEditApplication_Click(object sender, EventArgs e)
         {
-            AddEditLDLApp(isEdit: true);
+            await AddEditLDLApp(isEdit: true);
         }
 
-        private void BtnDeleteApplication_Click(object sender, EventArgs e)
+        private async void BtnDeleteApplication_Click(object sender, EventArgs e)
         {
             int localDrivingLicenseApplicationID = (int)dgvApplication.CurrentRow.Cells[0].Value;
 
-            if (!ClsBL_LocalDrivingLicenseApplication.IsExist(localDrivingLicenseApplicationID))
+            if (!await ClsBL_LocalDrivingLicenseApplication.IsExist(localDrivingLicenseApplicationID))
             {
                 MessageBox.Show("LDL Application Not Found", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -110,10 +111,10 @@ namespace DVLD_UI.Froms
             if (result == DialogResult.No) return;
 
 
-            if (ClsBL_LocalDrivingLicenseApplication.Delete(localDrivingLicenseApplicationID))
+            if (await ClsBL_LocalDrivingLicenseApplication.Delete(localDrivingLicenseApplicationID))
             {
                 MessageBox.Show("LDL Application Deleted Successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadApplicationDataToDataTable();
+                await LoadApplicationDataToDataTable();
             }
             else
             {
@@ -130,17 +131,17 @@ namespace DVLD_UI.Froms
             applictionInfo.ShowDialog();
         }
 
-        private void BtnCancelApplication_Click(object sender, EventArgs e)
+        private async void BtnCancelApplication_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure do want to cancel this application?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
                 return;
 
             int LocalDrivingLicenseApplicationID = (int)dgvApplication.CurrentRow.Cells[0].Value;
 
-            if (ClsBL_LocalDrivingLicenseApplication.CancelApplicationByID(LocalDrivingLicenseApplicationID))
+            if (await ClsBL_LocalDrivingLicenseApplication.CancelApplicationByID(LocalDrivingLicenseApplicationID))
             {
                 MessageBox.Show("This application canceled Successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadApplicationDataToDataTable();
+                await LoadApplicationDataToDataTable();
             }
             else
             {
@@ -190,28 +191,28 @@ namespace DVLD_UI.Froms
             }
         }
 
-        private void BtnTest_Click(object sender, EventArgs e)
+        private async void BtnTest_Click(object sender, EventArgs e)
         {
             ClsBL_TestType.EnType testType = (ClsBL_TestType.EnType)Convert.ToInt16(((ToolStripMenuItem)sender).Tag);
             int localDrivingLicenseApplicationID = (int)dgvApplication.CurrentRow.Cells[0].Value;
 
-            ScheduleTestAppointment(localDrivingLicenseApplicationID, testType);
+            await ScheduleTestAppointment(localDrivingLicenseApplicationID, testType);
         }
 
-        private void ScheduleTestAppointment(int localDrivingLicenseApplicationID, ClsBL_TestType.EnType testType)
+        private async Task ScheduleTestAppointment(int localDrivingLicenseApplicationID, ClsBL_TestType.EnType testType)
         {
             FRMManageTestAppointments manageTestAppointments = new FRMManageTestAppointments(localDrivingLicenseApplicationID, testType);
             manageTestAppointments.ShowDialog();
-            LoadApplicationDataToDataTable();
+            await LoadApplicationDataToDataTable();
         }
 
-        private void BtnIssueDrvingLicense_Click(object sender, EventArgs e)
+        private async void BtnIssueDrvingLicense_Click(object sender, EventArgs e)
         {
             int localDrivingLicenseApplicationID = (int)dgvApplication.CurrentRow.Cells[0].Value;
 
             FRMIssueDrivingLicneseFirstTime issueDrivingLicnese = new FRMIssueDrivingLicneseFirstTime(localDrivingLicenseApplicationID);
             issueDrivingLicnese.ShowDialog();
-            LoadApplicationDataToDataTable();
+            await LoadApplicationDataToDataTable();
 
         }
 
@@ -232,11 +233,11 @@ namespace DVLD_UI.Froms
             }
         }
 
-        private void BtnShowPersonLicenseHistory_Click(object sender, EventArgs e)
+        private async void BtnShowPersonLicenseHistory_Click(object sender, EventArgs e)
         {
             int ldlApplicationID = (int)dgvApplication.CurrentRow.Cells[0].Value;
 
-            int personID = ClsBL_LocalDrivingLicenseApplication.GetPersonIDByID(ldlApplicationID);
+            int personID = await ClsBL_LocalDrivingLicenseApplication.GetPersonIDByID(ldlApplicationID);
 
             FRMPersonLicenseHistory personLicenseHistory = new FRMPersonLicenseHistory(personID);
 

@@ -36,6 +36,7 @@ namespace DVLD_UI.UserControls
                 SelectTestType(_testType);
             }
         }
+
         public UCScheduleTestInfo()
         {
             InitializeComponent();
@@ -53,7 +54,7 @@ namespace DVLD_UI.UserControls
 
             int ldlApplicationID = _testAppointment.LocalDrivingLicenseApplicationID;
             string className = await ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(ldlApplicationID);
-            string fullName = ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(ldlApplicationID);
+            string fullName = await ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(ldlApplicationID);
             int testTrials = ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(ldlApplicationID, testType);
             DateTime appointmentDate = _testAppointment.AppointmentDate;
             float paidFees = _testAppointment.PaidFees;

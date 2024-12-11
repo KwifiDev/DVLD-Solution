@@ -54,16 +54,16 @@ namespace DVLD_UI.UserControls
 
             lLblViewLicenseInfo.Enabled = (_licenseID != -1);
 
-            FillControlsWithData();
+            await FillControlsWithData();
 
             await ucApplicationInfo1.LoadApplicationData(_ldlApplication.ApplicationID);
         }
 
-        private void FillControlsWithData()
+        private async Task FillControlsWithData()
         {
             lblLDLApplicationID.Text = _ldlApplication.LocalDrivingLicenseApplicationID.ToString();
             lblAppliedLicense.Text = _ldlApplication.LicenseClassInfo.ClassName;
-            lblPassedTests.Text = _ldlApplication.GetPassedTests().ToString() + "/3";
+            lblPassedTests.Text = (await _ldlApplication.GetPassedTests()).ToString() + "/3";
         }
 
         private void LLblViewLicenseInfo_LinkClicked(object sender, EventArgs e)

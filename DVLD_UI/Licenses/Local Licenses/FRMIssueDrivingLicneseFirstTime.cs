@@ -13,9 +13,9 @@ namespace DVLD_UI.Froms
             _ldlApplicationID = ldlApplicationID;
         }
 
-        private void FRMIssueDrivingLicneseFirstTime_Load(object sender, EventArgs e)
+        private async void FRMIssueDrivingLicneseFirstTime_Load(object sender, EventArgs e)
         {
-            ucIssueDrivingLicense1.LoadData(_ldlApplicationID);
+            await ucIssueDrivingLicense1.LoadData(_ldlApplicationID);
         }
     }
 }

@@ -59,7 +59,7 @@ namespace DVLD_UI.UserControls
             TestType = testType;
 
             _className = await ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(_ldlApplicationID);
-            _fullName = ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(_ldlApplicationID);
+            _fullName = await ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(_ldlApplicationID);
             TestTrials = ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(_ldlApplicationID, _testType);
 
 
@@ -68,14 +68,14 @@ namespace DVLD_UI.UserControls
 
 
             if (enMode == EnMode.Add)
-                LoadNewData();
+                await LoadNewData();
             else
                 LoadEditData();
 
             if (enCreationMode == EnCreationMode.RetakeTest) await PerpareRetakeTestApplication();
         }
 
-        private void LoadNewData()
+        private async Task LoadNewData()
         {
             _testAppointment = new ClsBL_TestAppointment();
 
@@ -87,7 +87,7 @@ namespace DVLD_UI.UserControls
             LoadDefaultDataToObject(testTypeFees);
 
             if (!HandleActiveAppointmentConstraint()) return;
-            if (!HandlePreviousTestConstraint()) return;
+            if (!await HandlePreviousTestConstraint()) return;
         }
 
         private void LoadEditData()
@@ -118,7 +118,7 @@ namespace DVLD_UI.UserControls
             {
                 _retakeTestApplication = new ClsBL_Application();
 
-                int applicantPersonID = ClsBL_LocalDrivingLicenseApplication.GetPersonIDByID(_ldlApplicationID);
+                int applicantPersonID = await ClsBL_LocalDrivingLicenseApplication.GetPersonIDByID(_ldlApplicationID);
                 float paidFess = (await ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.RetakeTest)).ApplicationFees;
 
                 _retakeTestApplication.ApplicantPersonID = applicantPersonID;
@@ -185,7 +185,7 @@ namespace DVLD_UI.UserControls
             return !isLocked;
         }
 
-        private bool HandlePreviousTestConstraint()
+        private async Task<bool> HandlePreviousTestConstraint()
         {
             if (enMode == EnMode.Edit) return true;
 
@@ -207,13 +207,13 @@ namespace DVLD_UI.UserControls
 
                 case ClsBL_TestType.EnType.Written:
                     // Written Test requires passing the Vision test first.
-                    isTestPassed = ClsBL_LocalDrivingLicenseApplication.IsPersonPassTest(_ldlApplicationID, ClsBL_TestType.EnType.Vision);
+                    isTestPassed = await ClsBL_LocalDrivingLicenseApplication.IsPersonPassTest(_ldlApplicationID, ClsBL_TestType.EnType.Vision);
                     message = "Cannot Schedule, Vision Test should be passed first";
                     break;
 
                 case ClsBL_TestType.EnType.Street:
                     // Street Test requires passing the Written test first.
-                    isTestPassed = ClsBL_LocalDrivingLicenseApplication.IsPersonPassTest(_ldlApplicationID, ClsBL_TestType.EnType.Written);
+                    isTestPassed = await ClsBL_LocalDrivingLicenseApplication.IsPersonPassTest(_ldlApplicationID, ClsBL_TestType.EnType.Written);
                     message = "Cannot Schedule, Written Test should be passed first";
                     break;
             }

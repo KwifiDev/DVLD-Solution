@@ -119,7 +119,7 @@ namespace DVLD_UI.Froms
                 return;
             }
 
-            if (IsPersonHaveActiveLDLApp())
+            if (await IsPersonHaveActiveLDLApp())
             {
                 MessageBox.Show("You Have Active Application With The Same Class License", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -148,10 +148,10 @@ namespace DVLD_UI.Froms
             return await ClsBL_License.IsPersonHaveActiveLicenseInSpecificClass(ucFindPerson1.PersonID, licenseClassID);
         }
 
-        private bool IsPersonHaveActiveLDLApp()
+        private async Task<bool> IsPersonHaveActiveLDLApp()
         {
             int licenseClassID = (int)cbLicenseClasses.SelectedValue;
-            return ClsBL_LocalDrivingLicenseApplication.IsPersonCanCreateLDLApp(ucFindPerson1.PersonID, licenseClassID);
+            return await ClsBL_LocalDrivingLicenseApplication.IsPersonCanCreateLDLApp(ucFindPerson1.PersonID, licenseClassID);
         }
 
         private void ShowEditMode()

@@ -85,7 +85,7 @@ namespace DVLD_UI.Froms
             }
         }
 
-        private void BtnAddTestAppointment_Click(object sender, EventArgs e)
+        private async void BtnAddTestAppointment_Click(object sender, EventArgs e)
         {
             if (IsPersonHaveActiveAppointment())
             {
@@ -93,7 +93,7 @@ namespace DVLD_UI.Froms
                 return;
             }
 
-            if (IsPersonPassedTest())
+            if (await IsPersonPassedTest())
             {
                 MessageBox.Show("You Cant Add New Appointment, Because You Passed This Test", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -111,9 +111,9 @@ namespace DVLD_UI.Froms
                    .IsPersonHaveActiveAppointment(_ldlApplicationID, _testType);
         }
 
-        private bool IsPersonPassedTest()
+        private async Task<bool> IsPersonPassedTest()
         {
-            return ClsBL_LocalDrivingLicenseApplication.IsPersonPassTest(_ldlApplicationID, _testType);
+            return await ClsBL_LocalDrivingLicenseApplication.IsPersonPassTest(_ldlApplicationID, _testType);
         }
 
         private void BtnEditTestAppointment_Click(object sender, EventArgs e)
