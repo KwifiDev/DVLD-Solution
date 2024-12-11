@@ -14,9 +14,9 @@ namespace DVLD_UI.Froms
             _testType = testType;
         }
 
-        private void FRMEditTestType_Load(object sender, EventArgs e)
+        private async void FRMEditTestType_Load(object sender, EventArgs e)
         {
-            ucEditTestType1.LoadTestTypeByID(_testType);
+            await ucEditTestType1.LoadTestTypeByID(_testType);
         }
     }
 }

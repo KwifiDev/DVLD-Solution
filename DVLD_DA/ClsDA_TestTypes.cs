@@ -4,15 +4,24 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
 
 namespace DVLD_DA
 {
     public class ClsDA_TestTypes
     {
-
-        public static bool GetTestTypeByID(int testTypeID, ref string testTypeTitle, ref string testTypeDescription, ref float testTypeFees)
+        public class Data
         {
-            bool isFound = false;
+            public bool IsFound { get; set; }
+            public int TestTypeID { get; set; }
+            public string TestTypeTitle { get; set; }
+            public string TestTypeDescription { get; set; }
+            public float TestTypeFees { get; set; }
+        }
+
+        public static async Task<Data> GetTestTypeByID(int testTypeID)
+        {
+            Data testType = null;
 
             string query = @"SELECT * FROM TestTypes WHERE TestTypeID = @TestTypeID";
 
@@ -24,16 +33,20 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            testTypeTitle = reader["TestTypeTitle"] as string;
-                            testTypeDescription = reader["TestTypeDescription"] as string;
-                            testTypeFees = Convert.ToSingle(reader["TestTypeFees"]);
+                            testType = new Data
+                            {
+                                IsFound = true,
+                                TestTypeID = testTypeID,
+                                TestTypeTitle = reader["TestTypeTitle"] as string,
+                                TestTypeDescription = reader["TestTypeDescription"] as string,
+                                TestTypeFees = Convert.ToSingle(reader["TestTypeFees"])
+                            };
                         }
                     }
 
@@ -44,11 +57,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return testType;
             }
         }
 
-        public static bool UpdateTestType(int testTypeID, string testTypeTitle, string testTypeDescription, float testTypeFees)
+        public static async Task<bool> UpdateTestType(int testTypeID, string testTypeTitle, string testTypeDescription, float testTypeFees)
         {
             bool isUpdated = false;
 
@@ -69,8 +82,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -83,7 +96,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllTestTypes()
+        public static async Task<DataTable> GetAllTestTypes()
         {
             DataTable dt_TestTypes = new DataTable();
 
@@ -94,9 +107,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_TestTypes.Load(reader);
                     }
@@ -112,7 +125,7 @@ namespace DVLD_DA
             }
         }
 
-        public static float GetTestFees(int testTypeID)
+        public static async Task<float> GetTestFees(int testTypeID)
         {
             float paidFees = 0;
 
@@ -126,8 +139,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object fees = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object fees = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (fees != null && float.TryParse(fees.ToString(), out float result))
                     {
                         paidFees = result;

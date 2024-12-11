@@ -1,6 +1,7 @@
 ﻿using ComponentFactory.Krypton.Toolkit;
 using DVLD_BL;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DVLD_UI.UserControls
@@ -14,9 +15,9 @@ namespace DVLD_UI.UserControls
             InitializeComponent();
         }
 
-        public void LoadTestTypeByID(ClsBL_TestType.EnType testType)
+        public async Task LoadTestTypeByID(ClsBL_TestType.EnType testType)
         {
-            _testType = ClsBL_TestType.Find(testType);
+            _testType = await ClsBL_TestType.Find(testType);
 
             if (_testType == null)
             {
@@ -36,7 +37,7 @@ namespace DVLD_UI.UserControls
             nudTestTypeFees.Value = (decimal)_testType.TestTypeFees;
         }
 
-        private void BtnUpdate_Click(object sender, EventArgs e)
+        private async void BtnUpdate_Click(object sender, EventArgs e)
         {
             if (!FieldsIsValid())
             {
@@ -46,7 +47,7 @@ namespace DVLD_UI.UserControls
 
             LoadDataToObject();
 
-            if (_testType.Save())
+            if (await _testType.Save())
             {
                 MessageBox.Show("Test Type Saved Successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }

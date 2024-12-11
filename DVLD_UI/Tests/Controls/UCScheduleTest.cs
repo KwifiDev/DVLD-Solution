@@ -79,7 +79,7 @@ namespace DVLD_UI.UserControls
         {
             _testAppointment = new ClsBL_TestAppointment();
 
-            float testTypeFees = ClsBL_TestType.FindTestTypeFees(_testType);
+            float testTypeFees = await ClsBL_TestType.FindTestTypeFees(_testType);
 
             SetMinDateToDatePicker(DateTime.Now);
 

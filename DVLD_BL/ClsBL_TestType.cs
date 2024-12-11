@@ -29,24 +29,24 @@ namespace DVLD_BL
             TestTypeFees = testTypeFees;
         }
 
-        public static ClsBL_TestType Find(EnType testTypeID)
+        public static async Task<ClsBL_TestType> Find(EnType testTypeID)
         {
-            string testTypeTitle = "", testTypeDescription = "";
-            float testTypeFees = 0.0f;
 
-            if (ClsDA_TestTypes.GetTestTypeByID((int)testTypeID, ref testTypeTitle, ref testTypeDescription, ref testTypeFees))
+            ClsDA_TestTypes.Data data = await ClsDA_TestTypes.GetTestTypeByID((int)testTypeID);
+
+            if (data != null && data.IsFound)
             {
-                return new ClsBL_TestType(testTypeID, testTypeTitle, testTypeDescription, testTypeFees);
+                return new ClsBL_TestType(testTypeID, data.TestTypeTitle, data.TestTypeDescription, data.TestTypeFees);
             }
             else return null;
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_TestTypes.GetAllTestTypes();
+            return await ClsDA_TestTypes.GetAllTestTypes();
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
@@ -54,20 +54,20 @@ namespace DVLD_BL
                     // Code Here
                     return false;
                 case EnMode.Update:
-                    return _Update();
+                    return await _Update();
             }
 
             return false;
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_TestTypes.UpdateTestType((int)TestType, TestTypeTitle, TestTypeDescription, TestTypeFees);
+            return await ClsDA_TestTypes.UpdateTestType((int)TestType, TestTypeTitle, TestTypeDescription, TestTypeFees);
         }
 
-        public static float FindTestTypeFees(EnType testType)
+        public static async Task<float> FindTestTypeFees(EnType testType)
         {
-            return ClsDA_TestTypes.GetTestFees((int)testType);
+            return await ClsDA_TestTypes.GetTestFees((int)testType);
         }
     }
 }
