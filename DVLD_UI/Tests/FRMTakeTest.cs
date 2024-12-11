@@ -42,11 +42,11 @@ namespace DVLD_UI.Froms
             lblUserMassage.Visible = true;
         }
 
-        private void BtnSave_Click(object sender, EventArgs e)
+        private async void BtnSave_Click(object sender, EventArgs e)
         {
             LoadDataToObject();
 
-            if (_test.Save())
+            if (await _test.Save())
             {
                 MessageBox.Show("Test Saved Successfully", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 ucScheduleTestInfo1.lblTestID.Text = _test.TestID.ToString();

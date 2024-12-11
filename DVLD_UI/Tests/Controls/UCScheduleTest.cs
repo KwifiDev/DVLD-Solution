@@ -60,7 +60,7 @@ namespace DVLD_UI.UserControls
 
             _className = await ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(_ldlApplicationID);
             _fullName = await ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(_ldlApplicationID);
-            TestTrials = ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(_ldlApplicationID, _testType);
+            TestTrials = await ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(_ldlApplicationID, _testType);
 
 
             enMode = (_testAppointmentID == -1) ? EnMode.Add : EnMode.Edit;

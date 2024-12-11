@@ -4,12 +4,23 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
 
 namespace DVLD_DA
 {
     public class ClsDA_Tests
     {
-        public static int AddNewTest(int testAppointmentID, bool testResult, string notes, int createdByUserID)
+        public class Data
+        {
+            public bool IsFound { get; set; }
+            public int TestID { get; set; }
+            public int TestAppointmentID { get; set; }
+            public bool TestResult { get; set; }
+            public string Notes { get; set; }
+            public int CreatedByUserID { get; set; }
+        }
+
+        public static async Task<int> AddNewTest(int testAppointmentID, bool testResult, string notes, int createdByUserID)
         {
             int testID = -1;
 
@@ -29,8 +40,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         testID = result;
@@ -46,9 +57,9 @@ namespace DVLD_DA
             return testID;
         }
 
-        public static bool GetTestByID(int testID, ref int testAppointmentID, ref bool testResult, ref string notes, ref int createdByUserID)
+        public static async Task<Data> GetTestByID(int testID)
         {
-            bool isFound = false;
+            Data test = null;
 
             string query = @"SELECT * FROM Tests WHERE TestID = @TestID";
 
@@ -60,17 +71,21 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            testAppointmentID = (int)reader["TestAppointmentID"];
-                            testResult = (bool)reader["TestResult"];
-                            notes = (string)reader["Notes"];
-                            createdByUserID = (int)reader["CreatedByUserID"];
+                            test = new Data
+                            {
+                                IsFound = true,
+                                TestID = testID,
+                                TestAppointmentID = (int)reader["TestAppointmentID"],
+                                TestResult = (bool)reader["TestResult"],
+                                Notes = (string)reader["Notes"],
+                                CreatedByUserID = (int)reader["CreatedByUserID"]
+                            };
                         }
                     }
 
@@ -81,11 +96,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return test;
             }
         }
 
-        public static DataTable GetAllTests()
+        public static async Task<DataTable> GetAllTests()
         {
             DataTable dt_Tests = new DataTable();
 
@@ -96,9 +111,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_Tests.Load(reader);
                     }
@@ -114,7 +129,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsTestExist(int testID)
+        public static async Task<bool> IsTestExist(int testID)
         {
             bool isExist = false;
 
@@ -128,9 +143,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
@@ -143,7 +158,7 @@ namespace DVLD_DA
             }
         }
 
-        public static byte TotalTrialsPerTest(int localDrivingLicenseApplicationID, int testTypeID)
+        public static async Task<byte> TotalTrialsPerTest(int localDrivingLicenseApplicationID, int testTypeID)
         {
             byte testFailsCount = 0;
 
@@ -160,8 +175,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && byte.TryParse(id.ToString(), out byte result))
                     {
                         testFailsCount = result;
@@ -177,7 +192,7 @@ namespace DVLD_DA
             return testFailsCount;
         }
 
-        public static int GetTestIDByTestAppointmentID(int testAppointmentID)
+        public static async Task<int> GetTestIDByTestAppointmentID(int testAppointmentID)
         {
             int testID = -1;
 
@@ -191,8 +206,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         testID = result;

@@ -50,12 +50,12 @@ namespace DVLD_UI.UserControls
 
             if (_testAppointment == null) return;
 
-            Test = ClsBL_Test.Find(testAppointmentID);
+            Test = await ClsBL_Test.Find(testAppointmentID);
 
             int ldlApplicationID = _testAppointment.LocalDrivingLicenseApplicationID;
             string className = await ClsBL_LocalDrivingLicenseApplication.GetClassNameByID(ldlApplicationID);
             string fullName = await ClsBL_LocalDrivingLicenseApplication.GetPersonFullNameByID(ldlApplicationID);
-            int testTrials = ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(ldlApplicationID, testType);
+            int testTrials = await ClsBL_LocalDrivingLicenseApplication.TotalTrialsPerTest(ldlApplicationID, testType);
             DateTime appointmentDate = _testAppointment.AppointmentDate;
             float paidFees = _testAppointment.PaidFees;
 

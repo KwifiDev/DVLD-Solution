@@ -41,35 +41,33 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static ClsBL_Test Find(int testID)
+        public static async Task<ClsBL_Test> Find(int testID)
         {
-            int testAppointmentID = -1, createdByUserID = -1;
-            bool testResult = false;
-            string notes = string.Empty;
-
-            if (ClsDA_Tests.GetTestByID(testID, ref testAppointmentID, ref testResult, ref notes, ref createdByUserID))
+            ClsDA_Tests.Data data = await ClsDA_Tests.GetTestByID(testID).ConfigureAwait(false);
+            
+            if (data != null && data.IsFound)
             {
-                return new ClsBL_Test(testID, testAppointmentID, testResult, notes, createdByUserID);
+                return new ClsBL_Test(testID, data.TestAppointmentID, data.TestResult, data.Notes, data.CreatedByUserID);
             }
             else return null;
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_Tests.GetAllTests();
+            return await ClsDA_Tests.GetAllTests();
         }
 
-        public static bool IsExist(int testID)
+        public static async Task<bool> IsExist(int testID)
         {
-            return ClsDA_Tests.IsTestExist(testID);
+            return await ClsDA_Tests.IsTestExist(testID);
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
                 case EnMode.Add:
-                    if (_Add())
+                    if (await _Add())
                     {
                         enMode = EnMode.Update;
                         return true;
@@ -88,16 +86,16 @@ namespace DVLD_BL
             return false;
         }
 
-        private bool _Add()
+        private async Task<bool> _Add()
         {
-            TestID = ClsDA_Tests.AddNewTest(TestAppointmentID,TestResult,Notes,CreatedByUserID);
+            TestID = await ClsDA_Tests.AddNewTest(TestAppointmentID,TestResult,Notes,CreatedByUserID);
 
             return (TestID > 0);
         }
 
-        public static int FindTestIDByTestAppointmentID(int testAppointmentID)
+        public static async Task<int> FindTestIDByTestAppointmentID(int testAppointmentID)
         {
-            return ClsDA_Tests.GetTestIDByTestAppointmentID(testAppointmentID);
+            return await ClsDA_Tests.GetTestIDByTestAppointmentID(testAppointmentID);
         }
     }
 }

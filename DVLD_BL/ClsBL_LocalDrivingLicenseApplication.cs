@@ -256,14 +256,14 @@ namespace DVLD_BL
             }
         }
 
-        public byte TotalTrialsPerTest(ClsBL_TestType.EnType testType)
+        public async Task<byte> TotalTrialsPerTest(ClsBL_TestType.EnType testType)
         {
-            return TotalTrialsPerTest(LocalDrivingLicenseApplicationID, testType);
+            return await TotalTrialsPerTest(LocalDrivingLicenseApplicationID, testType);
         }
 
-        public static byte TotalTrialsPerTest(int localDrivingLicenseApplicationID, ClsBL_TestType.EnType testType)
+        public static async Task<byte> TotalTrialsPerTest(int localDrivingLicenseApplicationID, ClsBL_TestType.EnType testType)
         {
-            return ClsDA_Tests.TotalTrialsPerTest(localDrivingLicenseApplicationID, (int)testType);
+            return await ClsDA_Tests.TotalTrialsPerTest(localDrivingLicenseApplicationID, (int)testType);
         }
 
         public bool IsPersonHaveActiveAppointment(ClsBL_TestType.EnType testType)
