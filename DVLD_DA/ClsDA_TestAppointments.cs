@@ -4,13 +4,33 @@ using System.Data.SqlClient;
 using static DVLD_DA.ClsDA_LogManager;
 using System.Diagnostics;
 using static DVLD_DA.ClsDA_Settings;
+using System.Threading.Tasks;
 
 namespace DVLD_DA
 {
     public class ClsDA_TestAppointments
     {
-        public static int AddNewTestAppointment(int testTypeID, int localDrivingLicenseApplicationID, DateTime appointmentDate,
-                                                float paidFees, int createdByUserID, bool isLocked, int retakeTestApplicationID)
+        public class Data
+        {
+            public bool IsFound { get; set; }
+            public int TestAppointmentID { get; set; }
+            public int TestTypeID { get; set; }
+            public int LocalDrivingLicenseApplicationID { get; set; }
+            public DateTime AppointmentDate { get; set; }
+            public float PaidFees { get; set; }
+            public int CreatedByUserID { get; set; }
+            public bool IsLocked { get; set; }
+            public int? RetakeTestApplicationID { get; set; }
+        }
+        public class DataView : Data
+        {
+            public string TestTypeTitle { get; set; }
+            public string ClassName { get; set; }
+            public string FullName { get; set; }
+        }
+
+        public static async Task<int> AddNewTestAppointment(int testTypeID, int localDrivingLicenseApplicationID, DateTime appointmentDate,
+                                                float paidFees, int createdByUserID, bool isLocked, int? retakeTestApplicationID)
         {
             int testAppointmentID = -1;
 
@@ -32,8 +52,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    object id = command.ExecuteScalar();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    object id = await command.ExecuteScalarAsync().ConfigureAwait(false);
                     if (id != null && int.TryParse(id.ToString(), out int result))
                     {
                         testAppointmentID = result;
@@ -49,7 +69,7 @@ namespace DVLD_DA
             return testAppointmentID;
         }
 
-        public static bool UpdateTestAppointment(int testAppointmentID, DateTime appointmentDate)
+        public static async Task<bool> UpdateTestAppointment(int testAppointmentID, DateTime appointmentDate)
         {
             bool isUpdated = false;
 
@@ -65,8 +85,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -79,11 +99,9 @@ namespace DVLD_DA
             }
         }
 
-        public static bool GetTestAppointmentByID(int testAppointmentID, ref int testTypeID,
-                                                ref int localDrivingLicenseApplicationID, ref DateTime appointmentDate,
-                                                ref float paidFees, ref int createdByUserID, ref bool isLocked, ref int retakeTestApplicationID)
+        public static async Task<Data> GetTestAppointmentByID(int testAppointmentID)
         {
-            bool isFound = false;
+            Data testAppointment = null;
 
             string query = @"SELECT * FROM TestAppointments 
                             WHERE TestAppointmentID = @TestAppointmentID";
@@ -96,20 +114,25 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            testTypeID = (int)reader["TestTypeID"];
-                            localDrivingLicenseApplicationID = (int)reader["LocalDrivingLicenseApplicationID"];
-                            appointmentDate = (DateTime)reader["AppointmentDate"];
-                            paidFees = Convert.ToSingle(reader["PaidFees"]);
-                            createdByUserID = (int)reader["CreatedByUserID"];
-                            isLocked = (bool)reader["IsLocked"];
-                            retakeTestApplicationID = (int)reader["RetakeTestApplicationID"];
+                            testAppointment = new Data();
+                            //{
+                            testAppointment.IsFound = true;
+                            testAppointment.TestTypeID = (int)reader["TestTypeID"];
+                            testAppointment.TestAppointmentID = testAppointmentID;
+                            testAppointment.LocalDrivingLicenseApplicationID = (int)reader["LocalDrivingLicenseApplicationID"];
+                            testAppointment.AppointmentDate = (DateTime)reader["AppointmentDate"];
+                            testAppointment.PaidFees = Convert.ToSingle(reader["PaidFees"]);
+                            testAppointment.CreatedByUserID = (int)reader["CreatedByUserID"];
+                            testAppointment.IsLocked = (bool)reader["IsLocked"];
+                            testAppointment.RetakeTestApplicationID = reader["RetakeTestApplicationID"] != DBNull.Value ? (int?)reader["RetakeTestApplicationID"] : null;
+                            //};
+                            
                         }
                     }
 
@@ -120,15 +143,13 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return testAppointment;
             }
         }
 
-        public static bool GetTestAppointmentViewByID(int testAppointmentID, ref int localDrivingLicenseApplicationID,
-                                                ref string testTypeTitle, ref string className, ref DateTime appointmentDate,
-                                                ref float paidFees, ref string fullName, ref bool isLocked)
+        public static async Task<Data> GetTestAppointmentViewByID(int testAppointmentID)
         {
-            bool isFound = false;
+            DataView testAppointmentView = null;
 
             string query = @"SELECT * FROM TestAppointments_View 
                             WHERE TestAppointmentID = @TestAppointmentID";
@@ -141,20 +162,25 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.Read())
                         {
-                            isFound = true;
-                            localDrivingLicenseApplicationID = (int)reader["LocalDrivingLicenseApplicationID"];
-                            testTypeTitle = (string)reader["TestTypeTitle"];
-                            className = (string)reader["ClassName"];
-                            appointmentDate = (DateTime)reader["AppointmentDate"];
-                            paidFees = (float)reader["PaidFees"];
-                            fullName = (string)reader["FullName"];
-                            isLocked = (bool)reader["IsLocked"];
+                            testAppointmentView = new DataView
+                            {
+                                IsFound = true,
+                                TestAppointmentID = testAppointmentID,
+                                LocalDrivingLicenseApplicationID = (int)reader["LocalDrivingLicenseApplicationID"],
+                                TestTypeTitle = (string)reader["TestTypeTitle"],
+                                ClassName = (string)reader["ClassName"],
+                                AppointmentDate = (DateTime)reader["AppointmentDate"],
+                                PaidFees = (float)reader["PaidFees"],
+                                FullName = (string)reader["FullName"],
+                                IsLocked = (bool)reader["IsLocked"]
+                            };
+                            
                         }
                     }
 
@@ -165,11 +191,11 @@ namespace DVLD_DA
                     AssignLog(ex, EventLogEntryType.Error, EnLayer.DataAccessLayer);
                 }
 
-                return isFound;
+                return testAppointmentView;
             }
         }
 
-        public static DataTable GetAllTestAppointments()
+        public static async Task<DataTable> GetAllTestAppointments()
         {
             DataTable dt_TestAppointments = new DataTable();
 
@@ -180,9 +206,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_TestAppointments.Load(reader);
                     }
@@ -198,7 +224,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetAllTestAppointments_View()
+        public static async Task<DataTable> GetAllTestAppointments_View()
         {
             DataTable dt_TestAppointments_View = new DataTable();
 
@@ -209,9 +235,9 @@ namespace DVLD_DA
             {
                 try
                 {
-                    connection.Open();
-
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_TestAppointments_View.Load(reader);
                     }
@@ -227,7 +253,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsTestAppointmentExist(int testAppointmentID)
+        public static async Task<bool> IsTestAppointmentExist(int testAppointmentID)
         {
             bool isExist = false;
 
@@ -242,9 +268,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isExist = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isExist = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)
@@ -257,7 +283,7 @@ namespace DVLD_DA
             }
         }
 
-        public static DataTable GetTestAppointmentsPerTestType(int localDrivingLicenseApplicationID, int testTypeID)
+        public static async Task<DataTable> GetTestAppointmentsPerTestType(int localDrivingLicenseApplicationID, int testTypeID)
         {
             DataTable dt_TestAppointments = new DataTable();
 
@@ -274,9 +300,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync().ConfigureAwait(false))
                     {
                         if (reader.HasRows) dt_TestAppointments.Load(reader);
                     }
@@ -292,7 +318,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool LockByTestAppointmentID(int testAppointmentID)
+        public static async Task<bool> LockByTestAppointmentID(int testAppointmentID)
         {
             bool isUpdated = false;
 
@@ -306,8 +332,8 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
-                    int affectedRows = command.ExecuteNonQuery();
+                    await connection.OpenAsync().ConfigureAwait(false);
+                    int affectedRows = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
                     isUpdated = (affectedRows > 0);
                 }
                 catch (Exception ex)
@@ -320,7 +346,7 @@ namespace DVLD_DA
             }
         }
 
-        public static bool IsPersonHaveActiveAppointment(int localDrivingLicenseApplicationID, int testTypeID)
+        public static async Task<bool> IsPersonHaveActiveAppointment(int localDrivingLicenseApplicationID, int testTypeID)
         {
             bool isAnyActiveAppointment = false;
 
@@ -337,9 +363,9 @@ namespace DVLD_DA
 
                 try
                 {
-                    connection.Open();
+                    await connection.OpenAsync().ConfigureAwait(false);
 
-                    isAnyActiveAppointment = Convert.ToInt32(command.ExecuteScalar()) > 0;
+                    isAnyActiveAppointment = Convert.ToInt32(await command.ExecuteScalarAsync().ConfigureAwait(false)) > 0;
 
                 }
                 catch (Exception ex)

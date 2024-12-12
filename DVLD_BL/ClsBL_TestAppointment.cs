@@ -20,10 +20,10 @@ namespace DVLD_BL
         public float PaidFees { get; set; }
         public int CreatedByUserID { get; set; }
         public bool IsLocked { get; set; }
-        public int RetakeTestApplicationID { get; set; }
+        public int? RetakeTestApplicationID { get; set; }
 
         private ClsBL_TestAppointment(int testAppointmentID, ClsBL_TestType.EnType testType, int localDrivingLicenseApplicationID,
-                                        DateTime appointmentDate, float paidFees, int createdByUserID, bool isLocked, int retakeTestApplicationID)
+                                        DateTime appointmentDate, float paidFees, int createdByUserID, bool isLocked, int? retakeTestApplicationID)
         {
             TestAppointmentID = testAppointmentID;
             TestType = testType;
@@ -48,44 +48,40 @@ namespace DVLD_BL
             enMode = EnMode.Add;
         }
 
-        public static ClsBL_TestAppointment Find(int testAppointmentID)
+        public static async Task<ClsBL_TestAppointment> Find(int testAppointmentID)
         {
-            int testTypeID = -1, localDrivingLicenseApplicationID = -1, createdByUserID = -1, retakeTestApplicationID = -1;
-            float paidFees = 0;
-            bool isLocked = false;
-            DateTime appointmentDate = DateTime.Now;
+            ClsDA_TestAppointments.Data data = await ClsDA_TestAppointments.GetTestAppointmentByID(testAppointmentID);
 
-            if (ClsDA_TestAppointments.GetTestAppointmentByID(testAppointmentID, ref testTypeID, 
-                                            ref localDrivingLicenseApplicationID,ref appointmentDate, ref paidFees,
-                                            ref createdByUserID, ref isLocked, ref retakeTestApplicationID))
+            if (data != null && data.IsFound)
             {
-                return new ClsBL_TestAppointment(testAppointmentID, (ClsBL_TestType.EnType)testTypeID, localDrivingLicenseApplicationID,
-                                                    appointmentDate, paidFees, createdByUserID, isLocked, retakeTestApplicationID);
+                return new ClsBL_TestAppointment(testAppointmentID, (ClsBL_TestType.EnType)data.TestTypeID,
+                    data.LocalDrivingLicenseApplicationID, data.AppointmentDate, data.PaidFees, data.CreatedByUserID,
+                    data.IsLocked, data.RetakeTestApplicationID);
             }
             else return null;
         }
 
-        public static DataTable Load()
+        public static async Task<DataTable> Load()
         {
-            return ClsDA_TestAppointments.GetAllTestAppointments();
+            return await ClsDA_TestAppointments.GetAllTestAppointments();
         }
 
-        public static DataTable LoadView()
+        public static async Task<DataTable> LoadView()
         {
-            return ClsDA_TestAppointments.GetAllTestAppointments_View();
+            return await ClsDA_TestAppointments.GetAllTestAppointments_View();
         }
 
-        public static bool IsExist(int testAppointmentID)
+        public static async Task<bool> IsExist(int testAppointmentID)
         {
-            return ClsDA_TestAppointments.IsTestAppointmentExist(testAppointmentID);
+            return await ClsDA_TestAppointments.IsTestAppointmentExist(testAppointmentID);
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             switch (enMode)
             {
                 case EnMode.Add:
-                    if (_Add())
+                    if (await _Add())
                     {
                         enMode = EnMode.Update;
                         return true;
@@ -93,34 +89,34 @@ namespace DVLD_BL
                     else return false;
 
                 case EnMode.Update:
-                    return _Update();
+                    return await _Update();
 
             }
             return false;
         }
 
-        private bool _Update()
+        private async Task<bool> _Update()
         {
-            return ClsDA_TestAppointments.UpdateTestAppointment(TestAppointmentID, AppointmentDate);
+            return await ClsDA_TestAppointments.UpdateTestAppointment(TestAppointmentID, AppointmentDate);
         }
 
-        private bool _Add()
+        private async Task<bool> _Add()
         {
-            TestAppointmentID = ClsDA_TestAppointments.AddNewTestAppointment
+            TestAppointmentID = await ClsDA_TestAppointments.AddNewTestAppointment
                 ((int)TestType, LocalDrivingLicenseApplicationID,
                 AppointmentDate, PaidFees, CreatedByUserID, IsLocked, RetakeTestApplicationID);
 
             return (TestAppointmentID > 0);
         }
 
-        public static bool LockByTestAppointmentID(int testAppointmentID)
+        public static async Task<bool> LockByTestAppointmentID(int testAppointmentID)
         {
-            return ClsDA_TestAppointments.LockByTestAppointmentID(testAppointmentID);
+            return await ClsDA_TestAppointments.LockByTestAppointmentID(testAppointmentID);
         }
 
-        public bool Lock()
+        public async Task<bool> Lock()
         {
-            return LockByTestAppointmentID(TestAppointmentID);
+            return await LockByTestAppointmentID(TestAppointmentID);
         }
        
     }

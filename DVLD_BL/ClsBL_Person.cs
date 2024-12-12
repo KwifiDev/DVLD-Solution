@@ -79,14 +79,14 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static async Task<ClsBL_Person> CreateAsync(int personID, string nationalNo, string firstName, string secondName, string thirdName, string lastName,
+        private static async Task<ClsBL_Person> CreateAsync(int personID, string nationalNo, string firstName, string secondName, string thirdName, string lastName,
                                        DateTime dateOfBirth, byte gendor, string address, string phone, string email,
                                        byte nationalityCountryID, string imagePath)
         {
             ClsBL_Person person = new ClsBL_Person(personID, nationalNo, firstName, secondName, thirdName, lastName,
                 dateOfBirth, gendor, address, phone, email, nationalityCountryID, imagePath)
             {
-                CountryInfo = await ClsBL_Country.Find(nationalityCountryID)
+                CountryInfo = await ClsBL_Country.Find(nationalityCountryID).ConfigureAwait(false)
             };
 
             return person;

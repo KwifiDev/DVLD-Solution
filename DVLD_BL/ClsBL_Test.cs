@@ -18,7 +18,7 @@ namespace DVLD_BL
         public bool TestResult { get; set; }
         public string Notes { get; set; }
         public int CreatedByUserID { get; set; }
-        public ClsBL_TestAppointment TestAppointmentInfo { get; }
+        public ClsBL_TestAppointment TestAppointmentInfo { get; private set; }
 
         public ClsBL_Test()
         {
@@ -37,8 +37,18 @@ namespace DVLD_BL
             TestResult = testResult;
             Notes = notes;
             CreatedByUserID = createdByUserID;
-            TestAppointmentInfo = ClsBL_TestAppointment.Find(TestAppointmentID);
+            //TestAppointmentInfo = await ClsBL_TestAppointment.Find(TestAppointmentID);
             enMode = EnMode.Update;
+        }
+
+        private static async Task<ClsBL_Test> CreateAsync(int testID, int testAppointmentID, bool testResult, string notes, int createdByUserID)
+        {
+            ClsBL_Test test = new ClsBL_Test(testID, testAppointmentID, testResult, notes, createdByUserID)
+            {
+                TestAppointmentInfo = await ClsBL_TestAppointment.Find(testAppointmentID).ConfigureAwait(false)
+            };
+
+            return test;
         }
 
         public static async Task<ClsBL_Test> Find(int testID)
@@ -47,7 +57,8 @@ namespace DVLD_BL
             
             if (data != null && data.IsFound)
             {
-                return new ClsBL_Test(testID, data.TestAppointmentID, data.TestResult, data.Notes, data.CreatedByUserID);
+                return await CreateAsync(testID, data.TestAppointmentID, data.TestResult, data.Notes,
+                                    data.CreatedByUserID).ConfigureAwait(false);
             }
             else return null;
         }

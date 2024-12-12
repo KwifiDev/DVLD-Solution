@@ -65,15 +65,15 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static async Task<ClsBL_Application> CreateAsync(int applicationID, int applicantPersonID,
+        private static async Task<ClsBL_Application> CreateAsync(int applicationID, int applicantPersonID,
             DateTime applicationDate, int applicationTypeID, EnStatus applicationStatus, DateTime lastStatusDate,
             float paidFees, int createdByUserID)
         {
             ClsBL_Application application = new ClsBL_Application(applicationID, applicantPersonID, applicationDate, applicationTypeID, applicationStatus, lastStatusDate, paidFees, createdByUserID)
             {
-                ApplicantPersonInfo = await ClsBL_Person.Find(applicantPersonID),
-                UserInfo = await ClsBL_User.Find(createdByUserID),
-                ApplicationTypeInfo = await ClsBL_ApplicationType.Find(applicationTypeID)
+                ApplicantPersonInfo = await ClsBL_Person.Find(applicantPersonID).ConfigureAwait(false),
+                UserInfo = await ClsBL_User.Find(createdByUserID).ConfigureAwait(false),
+                ApplicationTypeInfo = await ClsBL_ApplicationType.Find(applicationTypeID).ConfigureAwait(false)
             };
 
             return application;
@@ -95,7 +95,7 @@ namespace DVLD_BL
 
         public static async Task<ClsBL_Application> Find(int applicationID)
         {
-            ClsDA_Applications.Data data = await ClsDA_Applications.GetApplicationByID(applicationID);
+            ClsDA_Applications.Data data = await ClsDA_Applications.GetApplicationByID(applicationID).ConfigureAwait(false);
 
             if (data != null && data.IsFound)
             {

@@ -49,7 +49,7 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static async Task<ClsBL_InternationalLicense> CreateAsync(int applicationID, int applicantPersonID,
+        private static async Task<ClsBL_InternationalLicense> CreateAsync(int applicationID, int applicantPersonID,
                                    DateTime applicationDate, EnStatus applicationStatus, DateTime lastStatusDate,
                                    float paidFees, int createdByUserID, int internationalLicenseID,
                                    int driverID, int issuedUsingLocalLicenseID, DateTime issueDate,
@@ -60,12 +60,13 @@ namespace DVLD_BL
                 driverID, issuedUsingLocalLicenseID, issueDate, expirationDate, isActive)
             {
                 // Initialize Base OBJ
-                ApplicantPersonInfo = await ClsBL_Person.Find(applicantPersonID),
-                UserInfo = await ClsBL_User.Find(createdByUserID),
-                ApplicationTypeInfo = await ClsBL_ApplicationType.Find((int)ClsBL_ApplicationType.EnType.NewInternationalLicense),
+                ApplicantPersonInfo = await ClsBL_Person.Find(applicantPersonID).ConfigureAwait(false),
+                UserInfo = await ClsBL_User.Find(createdByUserID).ConfigureAwait(false),
+                ApplicationTypeInfo = await ClsBL_ApplicationType.Find
+                                      ((int)ClsBL_ApplicationType.EnType.NewInternationalLicense).ConfigureAwait(false),
                 
                 // Initialize Sub OBJ
-                DriverInfo = await ClsBL_Driver.Find(driverID)
+                DriverInfo = await ClsBL_Driver.Find(driverID).ConfigureAwait(false)
             };
 
 

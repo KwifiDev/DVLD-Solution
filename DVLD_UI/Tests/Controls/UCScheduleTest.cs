@@ -70,7 +70,7 @@ namespace DVLD_UI.UserControls
             if (enMode == EnMode.Add)
                 await LoadNewData();
             else
-                LoadEditData();
+                await LoadEditData();
 
             if (enCreationMode == EnCreationMode.RetakeTest) await PerpareRetakeTestApplication();
         }
@@ -86,13 +86,13 @@ namespace DVLD_UI.UserControls
             FillDataToControls(DateTime.Now, testTypeFees);
             LoadDefaultDataToObject(testTypeFees);
 
-            if (!HandleActiveAppointmentConstraint()) return;
+            if (!await HandleActiveAppointmentConstraint()) return;
             if (!await HandlePreviousTestConstraint()) return;
         }
 
-        private void LoadEditData()
+        private async Task LoadEditData()
         {
-            _testAppointment = ClsBL_TestAppointment.Find(_testAppointmentID);
+            _testAppointment = await ClsBL_TestAppointment.Find(_testAppointmentID);
 
             if (_testAppointment == null) return;
 
@@ -129,7 +129,7 @@ namespace DVLD_UI.UserControls
             }
             else
             {
-                _retakeTestApplication = await ClsBL_Application.Find(_testAppointment.RetakeTestApplicationID);
+                _retakeTestApplication = await ClsBL_Application.Find((int)_testAppointment.RetakeTestApplicationID);
             }
 
             FillRetakeTestApplicationControls();
@@ -159,11 +159,11 @@ namespace DVLD_UI.UserControls
             _testAppointment.PaidFees = testTypeFees;
         }
 
-        private bool HandleActiveAppointmentConstraint()
+        private async Task<bool> HandleActiveAppointmentConstraint()
         {
             if (enMode == EnMode.Edit) return true; // Else Add New Mode
 
-            bool isThereActiveAppointment = ClsBL_LocalDrivingLicenseApplication.IsPersonHaveActiveAppointment(_ldlApplicationID, _testType);
+            bool isThereActiveAppointment = await ClsBL_LocalDrivingLicenseApplication.IsPersonHaveActiveAppointment(_ldlApplicationID, _testType);
             
             if (isThereActiveAppointment)
             {
@@ -290,7 +290,7 @@ namespace DVLD_UI.UserControls
 
             if (!await HandleRetakeTestApplication()) return;
 
-            if (_testAppointment.Save())
+            if (await _testAppointment.Save())
             {
                 enMode = EnMode.Edit;
                 EnabledControls(isEnabled: false);

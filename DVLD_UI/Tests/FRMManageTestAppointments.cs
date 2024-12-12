@@ -27,7 +27,7 @@ namespace DVLD_UI.Froms
         {
             SelectTestType();
             await LoadLDLApplicationData();
-            LoadTestAppointmentsDataToDataTable();
+            await LoadTestAppointmentsDataToDataTable();
         }
 
         private void SelectTestType()
@@ -54,9 +54,9 @@ namespace DVLD_UI.Froms
             pbTestType.Image = image;
         }
 
-        private void LoadTestAppointmentsDataToDataTable()
+        private async Task LoadTestAppointmentsDataToDataTable()
         {
-            _testAppointmentsTB = ClsBL_LocalDrivingLicenseApplication
+            _testAppointmentsTB = await ClsBL_LocalDrivingLicenseApplication
                                   .LoadTestAppointmentsPerTestType(_ldlApplicationID, _testType);
             dgvTestAppointments.DataSource = _testAppointmentsTB;
         }
@@ -66,9 +66,9 @@ namespace DVLD_UI.Froms
             await ucldlApplicationInfo1.LoadDataByLDLApplicationID(_ldlApplicationID);
         }
 
-        private void BtnRefresh_Click(object sender, EventArgs e)
+        private async void BtnRefresh_Click(object sender, EventArgs e)
         {
-            LoadTestAppointmentsDataToDataTable();
+            await LoadTestAppointmentsDataToDataTable();
         }
 
         private void DgvTestAppointments_MouseDown(object sender, MouseEventArgs e)
@@ -87,7 +87,7 @@ namespace DVLD_UI.Froms
 
         private async void BtnAddTestAppointment_Click(object sender, EventArgs e)
         {
-            if (IsPersonHaveActiveAppointment())
+            if (await IsPersonHaveActiveAppointment())
             {
                 MessageBox.Show("You Have Active Appointment, You Cant Add Other One", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -102,12 +102,12 @@ namespace DVLD_UI.Froms
             FRMScheduleTest scheduleTest =
                 new FRMScheduleTest(_testType, ucldlApplicationInfo1.LDLApplication.LocalDrivingLicenseApplicationID);
             scheduleTest.ShowDialog();
-            LoadTestAppointmentsDataToDataTable();
+            await LoadTestAppointmentsDataToDataTable();
         }
 
-        private bool IsPersonHaveActiveAppointment()
+        private async Task<bool> IsPersonHaveActiveAppointment()
         {
-            return ClsBL_LocalDrivingLicenseApplication
+            return await ClsBL_LocalDrivingLicenseApplication
                    .IsPersonHaveActiveAppointment(_ldlApplicationID, _testType);
         }
 
@@ -116,7 +116,7 @@ namespace DVLD_UI.Froms
             return await ClsBL_LocalDrivingLicenseApplication.IsPersonPassTest(_ldlApplicationID, _testType);
         }
 
-        private void BtnEditTestAppointment_Click(object sender, EventArgs e)
+        private async void BtnEditTestAppointment_Click(object sender, EventArgs e)
         {
             int testAppointmentID = (int)dgvTestAppointments.CurrentRow.Cells[0].Value;
 
@@ -125,7 +125,7 @@ namespace DVLD_UI.Froms
             FRMScheduleTest scheduleTest = new FRMScheduleTest
                 (_testType, ucldlApplicationInfo1.LDLApplication.LocalDrivingLicenseApplicationID, testAppointmentID);
             scheduleTest.ShowDialog();
-            LoadTestAppointmentsDataToDataTable();
+            await LoadTestAppointmentsDataToDataTable();
         }
 
         private bool AppointmentValid()
@@ -151,7 +151,7 @@ namespace DVLD_UI.Froms
 
             FRMTakeTest takeTest = new FRMTakeTest(testAppointmentID, _testType);
             takeTest.ShowDialog();
-            LoadTestAppointmentsDataToDataTable();
+            await LoadTestAppointmentsDataToDataTable();
             await LoadLDLApplicationData();
         }
     }

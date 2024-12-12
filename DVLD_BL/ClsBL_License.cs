@@ -63,16 +63,16 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static async Task<ClsBL_License> CreateAsync(int licenseID, int applicationID, int driverID, int licenseClassID, DateTime issueDate,
+        private static async Task<ClsBL_License> CreateAsync(int licenseID, int applicationID, int driverID, int licenseClassID, DateTime issueDate,
                                         DateTime expirationDate, string notes, float paidFees,
                                         bool isActive, EnIssueReason issueReason, int createdByUserID)
         {
             ClsBL_License license = new ClsBL_License(licenseID, applicationID, driverID, licenseClassID, issueDate,
                 expirationDate, notes, paidFees, isActive, issueReason, createdByUserID)
             {
-                DriverInfo = await ClsBL_Driver.Find(driverID),
-                LicenseClassInfo = await ClsBL_LicenseClass.Find(licenseClassID),
-                DetainedInfo = await ClsBL_DetainedLicense.FindByLicenseID(licenseID)
+                DriverInfo = await ClsBL_Driver.Find(driverID).ConfigureAwait(false),
+                LicenseClassInfo = await ClsBL_LicenseClass.Find(licenseClassID).ConfigureAwait(false),
+                DetainedInfo = await ClsBL_DetainedLicense.FindByLicenseID(licenseID).ConfigureAwait(false)
             };
 
             return license;

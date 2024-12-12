@@ -46,7 +46,7 @@ namespace DVLD_UI.UserControls
         {
 
             _testType = testType;
-            _testAppointment = ClsBL_TestAppointment.Find(testAppointmentID);
+            _testAppointment = await ClsBL_TestAppointment.Find(testAppointmentID);
 
             if (_testAppointment == null) return;
 

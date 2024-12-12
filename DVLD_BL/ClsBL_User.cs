@@ -102,11 +102,11 @@ namespace DVLD_BL
 
         }
 
-        public static async Task<ClsBL_User> CreateAsync(int userID, int personID, string userName, string password, EnPermissions permissions, bool isActive)
+        private static async Task<ClsBL_User> CreateAsync(int userID, int personID, string userName, string password, EnPermissions permissions, bool isActive)
         {
             ClsBL_User user = new ClsBL_User(userID, personID, userName, password, permissions, isActive)
             {
-                PersonInfo = await ClsBL_Person.Find(personID)
+                PersonInfo = await ClsBL_Person.Find(personID).ConfigureAwait(false)
             };
 
             return user;
@@ -133,7 +133,8 @@ namespace DVLD_BL
 
             if (user != null & user.IsFound)
             {
-                return await CreateAsync(userID, user.PersonID, user.UserName, user.Password, (EnPermissions)user.Permissions, user.IsActive).ConfigureAwait(false);
+                return await CreateAsync(userID, user.PersonID, user.UserName, user.Password,
+                    (EnPermissions)user.Permissions, user.IsActive).ConfigureAwait(false);
             }
             else return null;
         }
@@ -144,7 +145,8 @@ namespace DVLD_BL
 
             if (user != null && user.IsFound)
             {
-                return await CreateAsync(user.UserID, personID, user.UserName, user.Password, (EnPermissions)user.Permissions, user.IsActive).ConfigureAwait(false);
+                return await CreateAsync(user.UserID, personID, user.UserName, user.Password,
+                    (EnPermissions)user.Permissions, user.IsActive).ConfigureAwait(false);
             }
             else return null;
         }
@@ -158,7 +160,8 @@ namespace DVLD_BL
 
             if (user != null && user.IsFound)
             {
-                return await CreateAsync(user.UserID, user.PersonID, userName, password, (EnPermissions)user.Permissions, user.IsActive).ConfigureAwait(false);
+                return await CreateAsync(user.UserID, user.PersonID, userName, password,
+                    (EnPermissions)user.Permissions, user.IsActive).ConfigureAwait(false);
             }
             else return null;
         }

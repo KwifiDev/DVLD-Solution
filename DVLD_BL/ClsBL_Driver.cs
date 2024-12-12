@@ -35,11 +35,11 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static async Task<ClsBL_Driver> CreateAsync(int driverID, int personID, int createdByUserID, DateTime createdDate)
+        private static async Task<ClsBL_Driver> CreateAsync(int driverID, int personID, int createdByUserID, DateTime createdDate)
         {
             ClsBL_Driver driver = new ClsBL_Driver(driverID, personID, createdByUserID, createdDate)
             {
-                PersonInfo = await ClsBL_Person.Find(personID)
+                PersonInfo = await ClsBL_Person.Find(personID).ConfigureAwait(false)
             };
 
             return driver;
@@ -47,7 +47,7 @@ namespace DVLD_BL
 
         public static async Task<ClsBL_Driver> Find(int driverID)
         {
-            ClsDA_Drivers.Data data = await ClsDA_Drivers.GetDriverByID(driverID);
+            ClsDA_Drivers.Data data = await ClsDA_Drivers.GetDriverByID(driverID).ConfigureAwait(false);
 
             if (data != null && data.IsFound)
             {
@@ -97,7 +97,7 @@ namespace DVLD_BL
 
         public static async Task<ClsBL_Driver> FindByPersonID(int personID)
         {
-            ClsDA_Drivers.Data data = await ClsDA_Drivers.GetDriverByPersonID(personID);
+            ClsDA_Drivers.Data data = await ClsDA_Drivers.GetDriverByPersonID(personID).ConfigureAwait(false);
 
             if (data != null && data.IsFound)
             {

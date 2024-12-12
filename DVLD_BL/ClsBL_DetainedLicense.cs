@@ -53,15 +53,15 @@ namespace DVLD_BL
             enMode = EnMode.Update;
         }
 
-        public static async Task<ClsBL_DetainedLicense> CreateAsync(int detainID, int licenseID, DateTime detainDate,
+        private static async Task<ClsBL_DetainedLicense> CreateAsync(int detainID, int licenseID, DateTime detainDate,
                                                 float fineFees, int createdByUserID, bool isReleased,
                                                 DateTime? releaseDate, int? releasedByUserID, int? releaseApplicationID)
         {
             ClsBL_DetainedLicense detainedLicense = new ClsBL_DetainedLicense(detainID, licenseID, detainDate, fineFees,
                 createdByUserID, isReleased, releaseDate, releasedByUserID, releaseApplicationID)
             {
-                CreatedByUserInfo = await ClsBL_User.Find(createdByUserID),
-                ReleasedByUserInfo = releasedByUserID != null ? await ClsBL_User.Find((int)releasedByUserID) : null
+                CreatedByUserInfo = await ClsBL_User.Find(createdByUserID).ConfigureAwait(false),
+                ReleasedByUserInfo = releasedByUserID != null ? await ClsBL_User.Find((int)releasedByUserID).ConfigureAwait(false) : null
             };
 
             return detainedLicense;
@@ -70,7 +70,7 @@ namespace DVLD_BL
         public static async Task<ClsBL_DetainedLicense> Find(int detainID)
         {
 
-            ClsDA_DetainedLicenses.Data data = await ClsDA_DetainedLicenses.GetDetainedLicenseByID(detainID);
+            ClsDA_DetainedLicenses.Data data = await ClsDA_DetainedLicenses.GetDetainedLicenseByID(detainID).ConfigureAwait(false);
 
             if (data != null && data.IsFound)
             {
@@ -132,7 +132,7 @@ namespace DVLD_BL
 
         public static async Task<ClsBL_DetainedLicense> FindByLicenseID(int licenseID)
         {
-            ClsDA_DetainedLicenses.Data data = await ClsDA_DetainedLicenses.GetDetainedLicenseByLicenseID(licenseID);
+            ClsDA_DetainedLicenses.Data data = await ClsDA_DetainedLicenses.GetDetainedLicenseByLicenseID(licenseID).ConfigureAwait(false);
 
             if (data != null && data.IsFound)
             {
